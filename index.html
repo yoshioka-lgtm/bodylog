@@ -387,7 +387,9 @@ nav .lb{font-size:10px; font-weight:600;}
         <input type="number" id="stepIn" inputmode="numeric" placeholder="—">
         <button class="btn pri" onclick="saveSteps()">記録</button>
       </div>
-      <div class="muted" id="stepSub" style="margin-top:8px"></div>
+      <div class="chips" id="stepQuick" style="margin-top:10px; margin-bottom:0"></div>
+      <button class="btn full sm" style="margin-top:8px" onclick="openHealth()">❤️ ヘルスケアアプリで歩数を見る</button>
+      <div class="muted" id="stepSub" style="margin-top:10px"></div>
     </div>
 
     <div class="card">
@@ -505,14 +507,14 @@ nav .lb{font-size:10px; font-weight:600;}
         体重は水分で1〜2kg簡単に動きます。前日比ではなく「記録タブの青い線（7日平均）」だけを見てください。これが下がっていれば順調です。<br><br>
         <b style="color:var(--fg)">食べすぎた日</b><br>
         1日の失敗では太りません。翌日いつも通りに戻せば問題ありません。記録をやめることだけが唯一の失敗です。<br><br>
-        <b style="color:var(--fg)">歩数を自動で入れたいとき</b><br>
-        iPhoneの「ショートカット」アプリで次を作ると、タップ1回で歩数入りのアプリが開きます。<br>
-        ① 新規ショートカット →「ヘルスケアサンプルを取得」を追加<br>
-        ② 種類＝<b>歩数</b>、期間＝<b>今日</b>、まとめる＝<b>合計</b><br>
-        ③「URLを開く」を追加し、URL欄に下を入れて、末尾に②の結果を差し込む<br>
+        <b style="color:var(--fg)">歩数の入れ方</b><br>
+        いちばん簡単なのは「❤️ ヘルスケアを開く」を押して数字を見て、戻ってきて数字ボタンを押す方法です。
+        だいたいで構いません。100歩単位の正確さは結果に影響しません。<br><br>
+        <b style="color:var(--fg)">ショートカットで自動化したい場合</b><br>
+        「ショートカット」アプリで、ヘルスケアの歩数を取得 →「URLを開く」で下のURLの末尾に歩数をつけて開く、
+        という2ステップのショートカットを作ると、タップ1回で歩数が入ります。<br>
         <code style="color:var(--accent);font-size:10.5px">https://yoshioka-lgtm.github.io/bodylog/?steps=</code><br>
-        ④ ショートカットをホーム画面に追加<br>
-        ※うまく渡らない場合は、ヘルスケアの数字を見て手入力してください（10秒で済みます）
+        ※アクションの名前はiOSのバージョンで変わります。設定が難しければ手入力で十分です。
       </div>
     </div>
   </section>
@@ -1068,6 +1070,8 @@ function renderTrain(){
 
   // 歩数
   document.getElementById('stepIn').value = D.steps || '';
+  document.getElementById('stepQuick').innerHTML = [3000,5000,8000,10000,12000].map(v=>
+      '<button class="'+(D.steps===v?'on':'')+'" onclick="setSteps('+v+')">'+v.toLocaleString()+'</button>').join('');
   document.getElementById('stepSub').innerHTML = D.steps
     ? '≒ <b style="color:var(--fg)">'+Math.round(walkBurn(cur))+' kcal</b>　'+
       '<span style="font-size:11px">3,000歩ぶんは生活代謝にすでに含まれているため、超えた分だけを計上しています</span>'
@@ -1108,6 +1112,19 @@ function saveSteps(){
   day().steps = v; save(); renderTrain();
   document.getElementById('stepIn').blur();
   toast(v>0 ? v.toLocaleString()+' 歩を記録' : '歩数をクリアしました');
+}
+/* おおよその歩数を1タップで入れる（同じ値をもう一度押すと取り消し） */
+function setSteps(v){
+  const D = day();
+  D.steps = (D.steps === v) ? 0 : v;
+  save(); renderTrain();
+  toast(D.steps ? D.steps.toLocaleString()+' 歩を記録' : '歩数をクリアしました');
+}
+/* iPhoneの「ヘルスケア」アプリを開く。開けない環境では案内を出すだけ */
+function openHealth(){
+  const t = Date.now();
+  location.href = 'x-apple-health://';
+  setTimeout(()=>{ if(Date.now()-t < 1500) toast('ヘルスケアアプリを手動で開いてください'); }, 800);
 }
 function swapDay(){
   const D = day(); D.wk.type = D.wk.type==='A'?'B':'A'; D.wk.sets = {}; save(); renderTrain();
