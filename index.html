@@ -195,6 +195,44 @@ nav .lb{font-size:10px; font-weight:600;}
 .obox h1{font-size:30px; margin:0 0 8px; letter-spacing:-.02em; font-weight:800;}
 .obox .lead{color:var(--dim); font-size:13.5px; margin:0 0 22px; line-height:1.75;}
 .obox h4{font-size:12px; color:var(--accent); margin:22px 0 10px; letter-spacing:.05em;}
+
+/* ===== 食事タブの手順ラベル ===== */
+.seglbl{font-size:12px; font-weight:700; color:var(--fg); margin:2px 0 6px;}
+.seglbl:not(:first-child){margin-top:14px;}
+.seglbl b{color:var(--accent); margin-right:5px;}
+.seglbl span{font-weight:400; color:var(--dim2); font-size:11px; margin-left:4px;}
+
+/* ===== 日替わりメッセージ ===== */
+.why{
+  background:linear-gradient(135deg,#1d2129,#191c23); border:1px solid #2f3542;
+  border-radius:var(--r); padding:15px 16px; margin-bottom:12px;
+}
+.why .wl{font-size:10px; color:var(--accent); font-weight:700; letter-spacing:.1em; margin-bottom:7px;}
+.why .wt{font-size:14.5px; line-height:1.75; font-weight:600;}
+
+/* ===== 写真 ===== */
+.photos{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.ph{
+  position:relative; aspect-ratio:3/4; border-radius:12px; overflow:hidden;
+  background:var(--card2); display:grid; place-items:center;
+}
+.ph img{width:100%; height:100%; object-fit:cover; display:block;}
+.ph .cap{
+  position:absolute; left:0; right:0; bottom:0; padding:16px 8px 6px;
+  font-size:11px; font-weight:700; text-align:center;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));
+}
+.ph .empty{font-size:11px; color:var(--dim2); text-align:center; padding:10px; line-height:1.6;}
+#lightbox{
+  position:fixed; inset:0; z-index:150; background:rgba(0,0,0,.94);
+  display:grid; place-items:center; padding:20px;
+}
+#lightbox img{max-width:100%; max-height:88vh; border-radius:10px;}
+.phset{display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+.phset:last-child{border-bottom:none;}
+.phset .thumb{width:46px; height:60px; border-radius:8px; background:var(--card2); object-fit:cover; flex:none;}
+.phset .nm{flex:1; font-size:13px; font-weight:600;}
+.phset .nm small{display:block; color:var(--dim2); font-size:11px; font-weight:400; margin-top:2px;}
 </style>
 </head>
 <body>
@@ -247,6 +285,12 @@ nav .lb{font-size:10px; font-weight:600;}
   <!-- ========== 今日 ========== -->
   <section id="v-home">
     <div id="bkWarn" class="warn hide" style="margin-bottom:12px"></div>
+
+    <div class="why" onclick="nextWhy()">
+      <div class="wl">WHY — 痩せたら、どうなる</div>
+      <div class="wt" id="whyText"></div>
+    </div>
+
     <div class="card budget">
       <div class="lbl">今日あと食べられる</div>
       <div><span class="big" id="bLeft">—</span><span class="unit">kcal</span></div>
@@ -285,6 +329,17 @@ nav .lb{font-size:10px; font-weight:600;}
       <button class="btn ghost full sm" style="margin-top:10px" onclick="toggleEasy()" id="easyBtn">今日はゆるめでいく</button>
     </div>
 
+    <div class="card" id="photoCard">
+      <div class="row between" style="margin-bottom:10px">
+        <h3 style="margin:0">目指す姿と、今の自分</h3>
+        <button class="btn sm ghost" style="padding:5px 10px;font-size:11px" onclick="go('set')">写真を選ぶ</button>
+      </div>
+      <div class="photos">
+        <div class="ph" id="phGoal" onclick="openPhoto('goal')"></div>
+        <div class="ph" id="phNow"  onclick="openPhoto('now')"></div>
+      </div>
+    </div>
+
     <div class="card">
       <h3>続いている記録</h3>
       <div class="streak">
@@ -299,8 +354,11 @@ nav .lb{font-size:10px; font-weight:600;}
   <!-- ========== 食事 ========== -->
   <section id="v-meal" class="hide">
     <div class="card" style="padding:12px">
+      <div class="seglbl"><b>①</b>いつ食べた？</div>
       <div class="seg" id="segTime"></div>
+      <div class="seglbl"><b>②</b>どれくらい食べた？<span>下のカロリー表示が連動して変わります</span></div>
       <div class="seg" id="segAmt"></div>
+      <div class="seglbl"><b>③</b>食べたものをタップ<span>タップした瞬間に記録されます</span></div>
       <div class="chips" id="catChips"></div>
       <div class="foods" id="foodGrid"></div>
     </div>
@@ -324,7 +382,16 @@ nav .lb{font-size:10px; font-weight:600;}
   <!-- ========== トレ ========== -->
   <section id="v-train" class="hide">
     <div class="card">
-      <h3>ウォーキング</h3>
+      <h3>今日の歩数</h3>
+      <div class="wbox">
+        <input type="number" id="stepIn" inputmode="numeric" placeholder="—">
+        <button class="btn pri" onclick="saveSteps()">記録</button>
+      </div>
+      <div class="muted" id="stepSub" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>ウォーキング（朝の習慣）</h3>
       <div class="row between">
         <div><b style="font-size:17px" id="walkMin">20</b> <span class="muted">分</span>
           <span class="muted" id="walkKcal" style="margin-left:8px"></span></div>
@@ -406,6 +473,16 @@ nav .lb{font-size:10px; font-weight:600;}
     </div>
 
     <div class="card">
+      <h3>写真</h3>
+      <div class="tiny" style="margin-bottom:12px">
+        写真は<b style="color:var(--fg)">このiPhoneの中だけ</b>に保存されます。インターネットには上がりません。
+        （保存時に自動で縮小します）
+      </div>
+      <div id="photoSet"></div>
+      <input type="file" id="phFile" accept="image/*" class="hide" onchange="pickPhoto(this)">
+    </div>
+
+    <div class="card">
       <h3>バックアップ</h3>
       <div id="bkStatus" class="tiny" style="margin-bottom:10px"></div>
       <div class="tiny" style="margin-bottom:10px">
@@ -427,7 +504,15 @@ nav .lb{font-size:10px; font-weight:600;}
         <b style="color:var(--fg)">記録の考え方</b><br>
         体重は水分で1〜2kg簡単に動きます。前日比ではなく「記録タブの青い線（7日平均）」だけを見てください。これが下がっていれば順調です。<br><br>
         <b style="color:var(--fg)">食べすぎた日</b><br>
-        1日の失敗では太りません。翌日いつも通りに戻せば問題ありません。記録をやめることだけが唯一の失敗です。
+        1日の失敗では太りません。翌日いつも通りに戻せば問題ありません。記録をやめることだけが唯一の失敗です。<br><br>
+        <b style="color:var(--fg)">歩数を自動で入れたいとき</b><br>
+        iPhoneの「ショートカット」アプリで次を作ると、タップ1回で歩数入りのアプリが開きます。<br>
+        ① 新規ショートカット →「ヘルスケアサンプルを取得」を追加<br>
+        ② 種類＝<b>歩数</b>、期間＝<b>今日</b>、まとめる＝<b>合計</b><br>
+        ③「URLを開く」を追加し、URL欄に下を入れて、末尾に②の結果を差し込む<br>
+        <code style="color:var(--accent);font-size:10.5px">https://yoshioka-lgtm.github.io/bodylog/?steps=</code><br>
+        ④ ショートカットをホーム画面に追加<br>
+        ※うまく渡らない場合は、ヘルスケアの数字を見て手入力してください（10秒で済みます）
       </div>
     </div>
   </section>
@@ -460,10 +545,12 @@ const DEFAULTS = {
     walkDefault:20,
     onboarded:false          // 初回セットアップ済みか
   },
-  days:{},        // 'YYYY-MM-DD' : { w, meals[], walk, wk:{type,sets{}}, easy }
+  days:{},        // 'YYYY-MM-DD' : { w, meals[], walk, steps, wk:{type,sets{}}, easy }
   myFoods:[],     // {n,k,p}
   useCount:{},    // 食品名 : 回数
-  lastBackup:null // 最後にファイル書き出しした日
+  lastBackup:null,// 最後にファイル書き出しした日
+  photos:{goal:null, before:null, now:null},  // 端末内にのみ保存（dataURL）
+  whyOffset:0     // 日替わりメッセージの手動送り
 };
 
 let DB = load();
@@ -553,6 +640,73 @@ B:{ name:'Bの日 — 上半身', items:[
 }};
 
 /* =========================================================
+   WHY — 日替わりで表示する「痩せたらどうなるか」
+   日付から決まるので毎日変わる。カードをタップすると次へ送れる。
+   ========================================================= */
+const WHY = [
+ '−10kgは、服のサイズが2つ下がるということ。今日の食事は、そのための1歩。',
+ 'Tシャツ1枚で成立する男になる。生地の問題やなかった、と気づく日が来る。',
+ '下心、大いに結構。3ヶ月続く動機のほうが、立派で続かない動機よりずっと強い。',
+ '階段を上っても息が上がらなくなる。',
+ '今日サボっても太らない。記録をやめた時だけ、元に戻る。',
+ 'ワイドパンツが「あえてゆったり穿いてる」に見える。「入るのがこれしかない」には見えない。',
+ '久しぶりに会った人の第一声が変わる。それが一番効く。',
+ '脂肪1kgは7,200kcal。ラーメン14杯分。だから急には減らない。それが普通。',
+ 'ジャケットは肩と胸で着る服。土台ができれば、同じ1着が別物になる。',
+ '完璧に3日やるより、雑に30日やるほうが痩せる。',
+ '顔は簡単に変えられない。体は3ヶ月で変えられる。勝負するならこっち。',
+ 'ベルトの穴が2つ内側に移る。地味やけど、めちゃくちゃ嬉しい瞬間。',
+ '腹が減ってるんやなくて、口が寂しいだけの時がある。見分けがつくと勝てる。',
+ '営業で最初に伝わるのは、経歴でも実績でもなく印象。',
+ 'シャツをタックインできる。これが一番わかりやすい変化。',
+ '体重が減らない日もある。ほぼ水分。記録タブの青い線だけ見ればいい。',
+ '「痩せたら着よう」としまい込んだ服。出番はもうすぐ。',
+ '運動で痩せるのはほぼ無理。20分歩いてもおにぎり半分。勝負は食事側。',
+ '写真を撮られるのを避けなくなる。横からでも平気になる。',
+ 'やめる理由は毎日ある。続ける理由は1つでいい。',
+ '10kgは米袋2つ分。それを24時間背負って歩いている状態から解放される。',
+ '今持ってる服が、全部新しく見える。買い足すより安上がり。',
+ '自己管理ができる人に見える。実際できてるんやから当然。',
+ 'タンパク質を削ると、減るのは脂肪やなくて筋肉。それは「痩せた」やなくて「やつれた」。',
+ '試着室の鏡が、確認する場所から、楽しみな場所に変わる。',
+ '3ヶ月後に「あの時始めといてよかった」と思う。今日がその「あの時」。',
+ '朝起きた瞬間の体の軽さが変わる。これは経験しないと分からない。',
+ 'Mサイズが「ちょうどいい」になる。Lを「まあ着れる」で選ばなくてよくなる。',
+ '「最近なんかいいですね」と言われる。何が、とは言われない。それでいい。',
+ '停滞期は必ず来る。体が守りに入ってるだけで、裏切られたわけやない。',
+ 'ニットは体型が出る服。逆に言えば、体さえできれば最強の服。',
+ '食べたものを記録するだけで、食べる量は勝手に減る。見られてる意識が効く。',
+ '膝にかかる負担は体重の約3倍。1kg減らせば3kg分軽くなる計算。',
+ '白シャツが似合う男は、だいたい絞れてる。',
+ '昨日食べすぎた？ 今日ふつうに戻せば、無かったことになる。',
+ '筋トレは痩せるためやなく、痩せた後の見た目のためにやる。',
+ '服が似合う体というのは、要するに余分がない体のこと。それだけ。',
+ '名刺を出す前に、もう半分伝わってる。',
+ '深夜の菓子パン350kcalは、20分ウォーキング4回分。割に合わない。',
+ '同じ67kgでも、筋肉がある67kgと無い67kgは別の生き物。',
+ '気合いは続かない。仕組みは続く。だからこのアプリがある。',
+ '靴下を履くとき、屈むのが楽になる。',
+ 'モテたいという動機を笑う人ほど、たいてい何も続いてない。',
+ '1週間で1kg以上減ったら、それは水分。喜ぶのは早い。',
+ 'シルエットを作るのは服じゃなくて体。服はその上に乗るだけ。',
+ '今日の1食を我慢するんやなくて、今日の1回を記録するだけ。',
+ '外食した日ほど記録する。見なかったことにするのが一番あかん。',
+ '寝つきが良くなる。いびきも減る。',
+ '清潔感の正体は、髪でも服でもなく輪郭。',
+ '体重計に乗るだけの日があってもいい。ゼロにしないことだけが大事。',
+ 'ビール1杯140kcal。3杯で腕立て何セット分か、考えてから2杯目を頼む。',
+ '夕方の疲れ方が変わる。夜に何かする余力が残る。',
+ '体を絞れた人は「決めたことをやる人」に見える。それは仕事の信用に直結する。',
+ '今までも何回かやめた。でも今回は記録が残ってる。そこが違う。',
+ '腹が減ったと思ったら、まず水を飲む。半分はそれで収まる。',
+ '隣に並んで歩くとき、姿勢が自然と伸びる。',
+ '変わったことに最初に気づくのは、他人やなくて自分。鏡の前で。',
+ '今日やることは3つだけ。測る、歩く、動く。それだけ。',
+ '3ヶ月後の自分は、今日の自分が作る。明日の自分は当てにならない。',
+ '67kgの自分は、もうすでに中にいる。周りを削るだけ。'
+];
+
+/* =========================================================
    保存 / 読み込み
    ========================================================= */
 function load(){
@@ -563,14 +717,17 @@ function load(){
     d.settings = Object.assign({}, DEFAULTS.settings, d.settings||{});
     d.days = d.days||{}; d.myFoods = d.myFoods||[]; d.useCount = d.useCount||{};
     if(d.lastBackup === undefined) d.lastBackup = null;
+    d.photos = Object.assign({goal:null, before:null, now:null}, d.photos||{});
+    d.whyOffset = d.whyOffset||0;
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
 function day(k){
   k = k||cur;
-  if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, wk:{type:autoType(k), sets:{}}, easy:false };
+  if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false };
   if(!DB.days[k].wk) DB.days[k].wk = { type:autoType(k), sets:{} };
+  if(DB.days[k].steps === undefined) DB.days[k].steps = 0;
   return DB.days[k];
 }
 
@@ -603,13 +760,18 @@ function bmr(w){
     : 10*w + 6.25*s.height - 5*s.age - 161;
 }
 function baseBurn(k){ return Math.round(bmr(curWeight(k)) * DB.settings.act); }
+/* 歩く分の消費。歩数が入っていれば歩数を優先（朝のウォーキングも歩数に含まれるため、
+   分数と両方足すと二重計上になる）。3000歩ぶんは生活代謝の活動係数に含まれるとみなして差し引く。 */
+function walkBurn(k){
+  const d = day(k), w = curWeight(k);
+  if(d.steps > 0) return Math.max(0, d.steps - 3000) * w * 0.0005;
+  return 3.5 * w * (d.walk/60) * 1.05;
+}
 function exBurn(k){
   const d = day(k), w = curWeight(k);
-  const walk = 3.5 * w * (d.walk/60) * 1.05;
   const setsDone = Object.values(d.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
-  const trainMin = setsDone * 1.3;                       // 1セット≒1.3分（休憩込み）
-  const train = 5.0 * w * (trainMin/60) * 1.05;
-  return Math.round(walk + train);
+  const train = 5.0 * w * ((setsDone*1.3)/60) * 1.05;    // 1セット≒1.3分（休憩込み）
+  return Math.round(walkBurn(k) + train);
 }
 function intake(k){ return Math.round(day(k).meals.reduce((a,m)=>a+m.k,0)); }
 function protein(k){ return Math.round(day(k).meals.reduce((a,m)=>a+(m.p||0),0)); }
@@ -662,6 +824,8 @@ function render(){
 /* ---------- 今日 ---------- */
 function renderHome(){
   const D = day(), tgt = targetIntake(cur), got = intake(cur), burn = exBurn(cur);
+  document.getElementById('whyText').textContent = whyOfDay();
+  renderPhotos();
   const left = tgt - got;
   const el = document.getElementById('bLeft');
   el.textContent = Math.abs(left); el.classList.toggle('over', left<0);
@@ -687,8 +851,11 @@ function renderHome(){
 
   // タスク
   tk('t-weight', !!D.w);
-  tk('t-walk', D.walk>0);
-  document.getElementById('walkN').textContent = D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分';
+  // 歩数が入っている日は歩数で判定（5,000歩以上で達成）
+  tk('t-walk', D.steps>0 ? D.steps>=5000 : D.walk>0);
+  document.getElementById('walkN').textContent = D.steps>0
+    ? D.steps.toLocaleString()+'歩'+(D.steps>=5000 ? '　達成' : '　あと'+(5000-D.steps).toLocaleString()+'歩')
+    : (D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分');
   const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
   const total = WORKOUTS[D.wk.type].items.reduce((a,i)=>a+i.sets,0);
   tk('t-train', done>=total);
@@ -725,6 +892,87 @@ function renderHome(){
     bw.classList.remove('hide');
   } else bw.classList.add('hide');
 }
+/* ---------- WHY（日替わり） ---------- */
+function whyOfDay(){
+  const n = Math.floor(new Date(cur+'T12:00').getTime()/86400000) + DB.whyOffset;
+  return WHY[((n % WHY.length) + WHY.length) % WHY.length];
+}
+function nextWhy(){ DB.whyOffset++; save(); document.getElementById('whyText').textContent = whyOfDay(); }
+
+/* ---------- 写真（端末内にのみ保存） ---------- */
+function renderPhotos(){
+  const p = DB.photos;
+  const put = (id, src, cap, hint) => {
+    document.getElementById(id).innerHTML = src
+      ? '<img src="'+src+'" alt=""><div class="cap">'+cap+'</div>'
+      : '<div class="empty">'+hint+'</div>';
+  };
+  put('phGoal', p.goal, '目指す姿', 'なりたい体・<br>着たい服の写真を<br>ここに');
+  const w = curWeight(cur);
+  put('phNow', p.now || p.before,
+      p.now ? ('今 '+w.toFixed(1)+'kg') : ('開始 '+DB.settings.startW.toFixed(1)+'kg'),
+      '今の自分の<br>写真をここに<br>（Before用）');
+}
+function openPhoto(slot){
+  const src = slot==='goal' ? DB.photos.goal : (DB.photos.now || DB.photos.before);
+  if(!src){ go('set'); toast('設定タブで写真を選べます'); return; }
+  const lb = document.createElement('div');
+  lb.id = 'lightbox';
+  lb.innerHTML = '<img src="'+src+'" alt="">';
+  lb.onclick = () => lb.remove();
+  document.body.appendChild(lb);
+}
+const PHOTO_DEFS = [
+  ['goal',  '目指す姿',       'なりたい体・着たい服の写真'],
+  ['before','開始時の自分',   '今のうちに1枚だけ撮っておく'],
+  ['now',   '今の自分',       '2週間に1回くらい撮り直す']
+];
+function renderPhotoSet(){
+  document.getElementById('photoSet').innerHTML = PHOTO_DEFS.map(([k,n,d])=>{
+    const src = DB.photos[k];
+    return '<div class="phset">'+
+      (src ? '<img class="thumb" src="'+src+'" alt="">' : '<div class="thumb"></div>')+
+      '<div class="nm">'+n+'<small>'+d+'</small></div>'+
+      '<button class="btn sm" onclick="choosePhoto(\''+k+'\')">'+(src?'変更':'選ぶ')+'</button>'+
+      (src ? '<button class="btn sm ghost" onclick="clearPhoto(\''+k+'\')">削除</button>' : '')+
+      '</div>';
+  }).join('');
+}
+let photoSlot = null;
+function choosePhoto(slot){ photoSlot = slot; document.getElementById('phFile').click(); }
+function clearPhoto(slot){
+  if(!confirm('この写真を削除します。よろしいですか？')) return;
+  DB.photos[slot] = null; save(); renderSet(); toast('削除しました');
+}
+/* 端末内で縮小してから保存。原寸のままだと保存容量を超えるため */
+function pickPhoto(input){
+  const f = input.files[0]; input.value = '';
+  if(!f || !photoSlot) return;
+  const fr = new FileReader();
+  fr.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 900;
+      let w = img.width, h = img.height;
+      if(Math.max(w,h) > MAX){ const r = MAX/Math.max(w,h); w = Math.round(w*r); h = Math.round(h*r); }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      const prev = DB.photos[photoSlot];
+      DB.photos[photoSlot] = cv.toDataURL('image/jpeg', 0.75);
+      try{ save(); }
+      catch(err){
+        DB.photos[photoSlot] = prev;
+        alert('保存容量が足りませんでした。他の写真を削除してからもう一度お試しください。');
+        return;
+      }
+      renderSet(); toast('写真を保存しました');
+    };
+    img.onerror = () => alert('この画像は読み込めませんでした。別の写真でお試しください。');
+    img.src = e.target.result;
+  };
+  fr.readAsDataURL(f);
+}
+
 function tk(id, on){ document.getElementById(id).classList.toggle('done', on); }
 function sgn(v){ return (v>0?'+':'')+v.toFixed(1); }
 function prevWeight(k){
@@ -746,6 +994,7 @@ function saveWeight(){
 function focusWeight(){ document.getElementById('wIn').focus(); }
 function toggleWalk(){
   const D = day();
+  if(D.steps>0){ go('train'); return; }   // 歩数管理中はトレタブで直接編集
   D.walk = D.walk>0 ? 0 : DB.settings.walkDefault;
   save(); render(); toast(D.walk>0? 'ウォーキング完了！' : '取り消しました');
 }
@@ -761,8 +1010,8 @@ function renderMeal(){
   seg.innerHTML = ['朝','昼','夜','間食'].map(t=>
     '<button class="'+(t===mealTime?'on':'')+'" onclick="mealTime=\''+t+'\';renderMeal()">'+t+'</button>').join('');
   // 量
-  document.getElementById('segAmt').innerHTML = [0.5,1,1.5,2].map(a=>
-    '<button class="'+(a===amt?'on':'')+'" onclick="amt='+a+';renderMeal()">'+(a===1?'ふつう':'×'+a)+'</button>').join('');
+  document.getElementById('segAmt').innerHTML = [[0.5,'半分'],[1,'ふつう'],[1.5,'1.5倍'],[2,'2倍']].map(a=>
+    '<button class="'+(a[0]===amt?'on':'')+'" onclick="amt='+a[0]+';renderMeal()">'+a[1]+'</button>').join('');
   // カテゴリ
   const cats = ['よく使う'].concat(Object.keys(FOODS)).concat(['マイ']);
   document.getElementById('catChips').innerHTML = cats.map(c=>
@@ -816,8 +1065,18 @@ function addCustom(){
 /* ---------- トレーニング ---------- */
 function renderTrain(){
   const D = day(), W = WORKOUTS[D.wk.type], w = curWeight(cur);
+
+  // 歩数
+  document.getElementById('stepIn').value = D.steps || '';
+  document.getElementById('stepSub').innerHTML = D.steps
+    ? '≒ <b style="color:var(--fg)">'+Math.round(walkBurn(cur))+' kcal</b>　'+
+      '<span style="font-size:11px">3,000歩ぶんは生活代謝にすでに含まれているため、超えた分だけを計上しています</span>'
+    : 'iPhoneの「ヘルスケア」アプリを見て入れてください。歩数を入れると、下のウォーキング時間より<b style="color:var(--fg)">歩数を優先</b>して計算します（二重に数えないため）。';
+
   document.getElementById('walkMin').textContent = D.walk;
-  document.getElementById('walkKcal').textContent = '≒ '+Math.round(3.5*w*(D.walk/60)*1.05)+' kcal';
+  document.getElementById('walkKcal').textContent = D.steps>0
+    ? '（消費は歩数から計算中）'
+    : '≒ '+Math.round(3.5*w*(D.walk/60)*1.05)+' kcal';
   document.getElementById('wkTitle').textContent = W.name;
   document.getElementById('wkTips').innerHTML = W.tip;
 
@@ -842,6 +1101,13 @@ function setDone(id, n){
 }
 function addWalk(n){
   const D = day(); D.walk = Math.max(0, D.walk + n); save(); renderTrain();
+}
+function saveSteps(){
+  const v = parseInt(document.getElementById('stepIn').value);
+  if(!(v >= 0) || v > 100000){ toast('歩数を入力してください'); return; }
+  day().steps = v; save(); renderTrain();
+  document.getElementById('stepIn').blur();
+  toast(v>0 ? v.toLocaleString()+' 歩を記録' : '歩数をクリアしました');
 }
 function swapDay(){
   const D = day(); D.wk.type = D.wk.type==='A'?'B':'A'; D.wk.sets = {}; save(); renderTrain();
@@ -950,6 +1216,7 @@ function drawChart(){
 /* ---------- 設定 ---------- */
 function renderSet(){
   const s = DB.settings;
+  renderPhotoSet();
   document.getElementById('sHeight').value = s.height;
   document.getElementById('sAge').value    = s.age;
   document.getElementById('sSex').value    = s.sex;
@@ -1089,7 +1356,19 @@ function finishOnboard(){
 }
 
 /* ---------- 起動 ---------- */
+/* ショートカット等から ?steps=8432 で開かれたら、その歩数を今日の記録に入れる */
+(function(){
+  const q = new URLSearchParams(location.search);
+  const s = parseInt(q.get('steps'));
+  if(s >= 0 && s <= 100000){
+    day(isoToday()).steps = s; save();
+    setTimeout(()=>toast(s.toLocaleString()+' 歩を記録しました'), 400);
+  }
+  if(location.search) history.replaceState(null, '', location.pathname);
+})();
+
 document.getElementById('wIn').addEventListener('keydown', e=>{ if(e.key==='Enter') saveWeight(); });
+document.getElementById('stepIn').addEventListener('keydown', e=>{ if(e.key==='Enter') saveSteps(); });
 window.addEventListener('resize', ()=>{ if(view==='graph') drawChart(); });
 render();
 if(!DB.settings.onboarded) showOnboard();
