@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BodyLog">
+<meta name="theme-color" content="#0f1115">
+<title>BodyLog</title>
+<style>
+:root{
+  --bg:#0f1115; --card:#181b22; --card2:#20242d; --line:#2c313c;
+  --fg:#eef1f6; --dim:#8b93a3; --dim2:#5f6675;
+  --accent:#f0b429; --good:#3ecf8e; --bad:#ff5f56; --blue:#5aa9f7;
+  --r:14px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:15px; line-height:1.5;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:contain;
+}
+button,input,select,textarea{font-family:inherit; font-size:16px; color:inherit;}
+button{border:none; background:none; cursor:pointer; padding:0;}
+.hide{display:none !important;}
+
+/* ===== header ===== */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(15,17,21,.92); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  display:flex; align-items:center; gap:8px;
+}
+.datenav{display:flex; align-items:center; gap:4px; flex:1;}
+.datenav b{font-size:17px; font-weight:700;}
+.datenav .sub{font-size:11px; color:var(--dim); display:block; line-height:1.2;}
+.arrow{width:34px;height:34px;border-radius:10px;background:var(--card);display:grid;place-items:center;font-size:16px;color:var(--dim);}
+.arrow:active{background:var(--card2);}
+.todaybtn{font-size:12px;padding:6px 12px;border-radius:20px;background:var(--card);color:var(--dim);font-weight:600;}
+.todaybtn.on{background:var(--accent);color:#000;}
+
+/* ===== layout ===== */
+main{padding:12px; max-width:640px; margin:0 auto;}
+.card{background:var(--card); border-radius:var(--r); padding:14px; margin-bottom:12px;}
+.card h3{margin:0 0 10px; font-size:13px; color:var(--dim); font-weight:700; letter-spacing:.04em;}
+.row{display:flex; align-items:center; gap:10px;}
+.between{justify-content:space-between;}
+.muted{color:var(--dim); font-size:12px;}
+.tiny{font-size:11px; color:var(--dim2); line-height:1.5;}
+
+/* ===== budget ring ===== */
+.budget{text-align:center; padding:18px 14px 14px;}
+.budget .big{font-size:52px; font-weight:800; letter-spacing:-.03em; line-height:1;}
+.budget .big.over{color:var(--bad);}
+.budget .unit{font-size:15px; color:var(--dim); font-weight:600; margin-left:4px;}
+.budget .lbl{font-size:12px; color:var(--dim); margin-bottom:6px;}
+.bar{height:9px; border-radius:99px; background:var(--card2); overflow:hidden; margin:14px 0 8px;}
+.bar>i{display:block; height:100%; background:linear-gradient(90deg,#3ecf8e,#f0b429); transition:width .3s;}
+.bar>i.over{background:var(--bad);}
+.kv{display:flex; justify-content:space-around; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+.kv div{text-align:center;}
+.kv span{display:block; font-size:11px; color:var(--dim);}
+.kv b{font-size:17px; font-weight:700;}
+
+/* ===== tasks ===== */
+.task{
+  display:flex; align-items:center; gap:12px; padding:13px 12px;
+  background:var(--card2); border-radius:12px; margin-bottom:8px;
+}
+.task:last-child{margin-bottom:0;}
+.task .ck{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--dim2);
+  display:grid;place-items:center;font-size:14px;color:transparent;flex:none;transition:.15s;
+}
+.task.done .ck{background:var(--good); border-color:var(--good); color:#0f1115;}
+.task .t{flex:1; font-weight:600; font-size:14px;}
+.task.done .t{color:var(--dim); text-decoration:line-through;}
+.task .n{font-size:11px; color:var(--dim); font-weight:400; display:block; text-decoration:none;}
+
+/* ===== streak ===== */
+.streak{display:flex; gap:10px;}
+.streak>div{flex:1; background:var(--card2); border-radius:12px; padding:12px; text-align:center;}
+.streak b{display:block; font-size:24px; font-weight:800; line-height:1.2;}
+.streak span{font-size:11px; color:var(--dim);}
+
+/* ===== inputs ===== */
+.wbox{display:flex; align-items:center; gap:8px;}
+.wbox input{
+  flex:1; background:var(--card2); border:1px solid var(--line); border-radius:10px;
+  padding:12px; font-size:22px; font-weight:700; text-align:center; color:var(--fg);
+}
+.btn{
+  padding:12px 16px; border-radius:10px; background:var(--card2);
+  font-weight:700; font-size:14px; color:var(--fg); text-align:center;
+}
+.btn:active{opacity:.7;}
+.btn.pri{background:var(--accent); color:#000;}
+.btn.ghost{background:transparent; border:1px solid var(--line); color:var(--dim);}
+.btn.sm{padding:8px 12px; font-size:13px;}
+.btn.full{width:100%; display:block;}
+.btn.dngr{background:transparent;border:1px solid var(--bad);color:var(--bad);}
+input[type=number],input[type=text],input[type=date],select{
+  background:var(--card2); border:1px solid var(--line); border-radius:10px;
+  padding:10px; color:var(--fg); width:100%;
+}
+label.f{display:block; margin-bottom:10px;}
+label.f span{display:block; font-size:12px; color:var(--dim); margin-bottom:4px;}
+
+/* ===== segment ===== */
+.seg{display:flex; background:var(--card2); border-radius:10px; padding:3px; gap:2px; margin-bottom:10px;}
+.seg button{flex:1; padding:9px 4px; border-radius:8px; font-size:13px; font-weight:600; color:var(--dim);}
+.seg button.on{background:var(--accent); color:#000;}
+.chips{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px; scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chips button{
+  flex:none; padding:8px 14px; border-radius:99px; background:var(--card2);
+  font-size:13px; font-weight:600; color:var(--dim); white-space:nowrap;
+}
+.chips button.on{background:var(--fg); color:var(--bg);}
+
+/* ===== food list ===== */
+.foods{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.food{
+  background:var(--card2); border-radius:11px; padding:10px 11px; text-align:left;
+  display:flex; flex-direction:column; gap:3px; min-height:64px; justify-content:center;
+}
+.food:active{background:#2b3140;}
+.food .fn{font-size:12.5px; font-weight:600; line-height:1.35;}
+.food .fk{font-size:11px; color:var(--accent); font-weight:700;}
+.food .fk i{color:var(--dim); font-style:normal; font-weight:400; margin-left:5px;}
+.eaten{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);}
+.eaten:last-child{border-bottom:none;}
+.eaten .en{flex:1; font-size:13.5px;}
+.eaten .en small{display:block; color:var(--dim2); font-size:11px;}
+.eaten .ek{font-size:13px; font-weight:700; color:var(--accent);}
+.eaten .del{width:28px;height:28px;border-radius:8px;background:var(--card2);color:var(--dim);font-size:15px;}
+
+/* ===== workout ===== */
+.ex{background:var(--card2); border-radius:12px; padding:12px; margin-bottom:8px;}
+.ex .exh{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.ex .exn{font-weight:700; font-size:14.5px;}
+.ex .exd{font-size:11.5px; color:var(--dim); margin-top:2px;}
+.sets{display:flex; gap:6px; margin-top:10px;}
+.sets button{
+  flex:1; height:38px; border-radius:9px; background:var(--card); border:1.5px solid var(--line);
+  font-size:12px; font-weight:700; color:var(--dim2);
+}
+.sets button.on{background:var(--good); border-color:var(--good); color:#0f1115;}
+.tip{font-size:11.5px; color:var(--dim); background:var(--card2); border-radius:10px; padding:10px; line-height:1.6;}
+
+/* ===== chart ===== */
+canvas{width:100%; display:block;}
+.legend{display:flex; gap:14px; font-size:11px; color:var(--dim); margin-top:8px; flex-wrap:wrap;}
+.legend i{display:inline-block; width:18px; height:3px; border-radius:2px; vertical-align:middle; margin-right:5px;}
+table.log{width:100%; border-collapse:collapse; font-size:12.5px;}
+table.log th{color:var(--dim); font-weight:600; font-size:11px; text-align:right; padding:6px 4px; border-bottom:1px solid var(--line);}
+table.log th:first-child{text-align:left;}
+table.log td{padding:8px 4px; text-align:right; border-bottom:1px solid #22262f;}
+table.log td:first-child{text-align:left; color:var(--dim);}
+
+/* ===== nav ===== */
+nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  background:rgba(15,17,21,.94); backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:flex; padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{flex:1; padding:9px 0 8px; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--dim2);}
+nav button.on{color:var(--accent);}
+nav .ic{font-size:19px; line-height:1;}
+nav .lb{font-size:10px; font-weight:600;}
+
+.toast{
+  position:fixed; left:50%; bottom:calc(78px + env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(8px); z-index:100;
+  background:var(--fg); color:var(--bg); padding:10px 18px; border-radius:99px;
+  font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.22s; white-space:nowrap;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+.warn{background:#3a2a12; border:1px solid #6b4d16; color:#f5c86b; font-size:12px; padding:10px 12px; border-radius:10px; line-height:1.6;}
+
+/* ===== 初回セットアップ ===== */
+#onboard{
+  position:fixed; inset:0; z-index:200; background:var(--bg); overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 34px) 18px 40px;
+}
+.obox{max-width:420px; margin:0 auto;}
+.obox h1{font-size:30px; margin:0 0 8px; letter-spacing:-.02em; font-weight:800;}
+.obox .lead{color:var(--dim); font-size:13.5px; margin:0 0 22px; line-height:1.75;}
+.obox h4{font-size:12px; color:var(--accent); margin:22px 0 10px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+
+<!-- ========== 初回セットアップ（初めて開いたときだけ表示） ========== -->
+<div id="onboard" class="hide">
+  <div class="obox">
+    <h1>BodyLog</h1>
+    <p class="lead">
+      あなたの数値から、1日に食べていい量を計算します。<br>
+      記録は<b style="color:var(--fg)">この端末の中だけ</b>に保存され、どこにも送信されません。
+    </p>
+
+    <h4>体のこと</h4>
+    <div class="row" style="gap:8px">
+      <label class="f" style="flex:1"><span>身長(cm)</span><input type="number" id="oHeight" inputmode="decimal" placeholder="170"></label>
+      <label class="f" style="flex:1"><span>年齢</span><input type="number" id="oAge" inputmode="numeric" placeholder="30"></label>
+    </div>
+    <label class="f"><span>性別（基礎代謝の計算に使います）</span>
+      <select id="oSex"><option value="male">男性</option><option value="female">女性</option></select></label>
+    <label class="f"><span>ふだんの活動量（運動を除く）</span>
+      <select id="oAct">
+        <option value="1.2">ほぼ座っている（デスクワーク中心）</option>
+        <option value="1.3" selected>やや動く（外回りが少しある）</option>
+        <option value="1.4">よく動く（立ち仕事・外回り中心）</option>
+        <option value="1.55">かなり動く（力仕事）</option>
+      </select></label>
+
+    <h4>目標</h4>
+    <div class="row" style="gap:8px">
+      <label class="f" style="flex:1"><span>今の体重(kg)</span><input type="number" id="oW" step="0.1" inputmode="decimal" placeholder="70.0"></label>
+      <label class="f" style="flex:1"><span>目標体重(kg)</span><input type="number" id="oGoalW" step="0.1" inputmode="decimal" placeholder="65.0"></label>
+    </div>
+    <label class="f"><span>いつまでに</span><input type="date" id="oGoalD"></label>
+    <div id="oPreview" class="tiny" style="margin:14px 0 18px"></div>
+
+    <button class="btn pri full" onclick="finishOnboard()">はじめる</button>
+    <div class="tiny" style="text-align:center; margin-top:14px">あとから設定タブでいつでも変更できます</div>
+  </div>
+</div>
+
+<header>
+  <button class="arrow" onclick="moveDay(-1)">‹</button>
+  <div class="datenav"><div><b id="hDate">—</b><span class="sub" id="hSub"></span></div></div>
+  <button class="arrow" onclick="moveDay(1)">›</button>
+  <button class="todaybtn" id="hToday" onclick="goToday()">今日</button>
+</header>
+
+<main>
+  <!-- ========== 今日 ========== -->
+  <section id="v-home">
+    <div id="bkWarn" class="warn hide" style="margin-bottom:12px"></div>
+    <div class="card budget">
+      <div class="lbl">今日あと食べられる</div>
+      <div><span class="big" id="bLeft">—</span><span class="unit">kcal</span></div>
+      <div class="bar"><i id="bBar" style="width:0%"></i></div>
+      <div class="muted" id="bSub">—</div>
+      <div class="kv">
+        <div><span>摂取</span><b id="kIn">0</b></div>
+        <div><span>運動消費</span><b id="kBurn">0</b></div>
+        <div><span>タンパク質</span><b id="kP">0g</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>体重</h3>
+      <div class="wbox">
+        <input type="number" id="wIn" inputmode="decimal" step="0.1" placeholder="—">
+        <button class="btn pri" onclick="saveWeight()">記録</button>
+      </div>
+      <div class="muted" id="wSub" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>今日やること</h3>
+      <div class="task" id="t-weight" onclick="focusWeight()">
+        <div class="ck">✓</div><div class="t">体重を測る<span class="n">これだけは毎日</span></div>
+      </div>
+      <div class="task" id="t-walk" onclick="toggleWalk()">
+        <div class="ck">✓</div><div class="t">ウォーキング<span class="n" id="walkN">20分</span></div>
+      </div>
+      <div class="task" id="t-train" onclick="go('train')">
+        <div class="ck">✓</div><div class="t">筋トレ<span class="n" id="trainN">—</span></div>
+      </div>
+      <div class="task" id="t-meal" onclick="go('meal')">
+        <div class="ck">✓</div><div class="t">食事を記録<span class="n" id="mealN">まだ0件</span></div>
+      </div>
+      <button class="btn ghost full sm" style="margin-top:10px" onclick="toggleEasy()" id="easyBtn">今日はゆるめでいく</button>
+    </div>
+
+    <div class="card">
+      <h3>続いている記録</h3>
+      <div class="streak">
+        <div><b id="sStreak">0</b><span>連続記録日</span></div>
+        <div><b id="sDown">—</b><span>開始からの増減</span></div>
+        <div><b id="sLeft">—</b><span>目標まで</span></div>
+      </div>
+      <div class="muted" id="paceMsg" style="margin-top:10px; text-align:center"></div>
+    </div>
+  </section>
+
+  <!-- ========== 食事 ========== -->
+  <section id="v-meal" class="hide">
+    <div class="card" style="padding:12px">
+      <div class="seg" id="segTime"></div>
+      <div class="seg" id="segAmt"></div>
+      <div class="chips" id="catChips"></div>
+      <div class="foods" id="foodGrid"></div>
+    </div>
+
+    <div class="card">
+      <h3>自分で入力</h3>
+      <div class="row" style="gap:6px">
+        <input type="text" id="cfName" placeholder="食べたもの" style="flex:2">
+        <input type="number" id="cfKcal" inputmode="numeric" placeholder="kcal" style="flex:1">
+        <input type="number" id="cfP" inputmode="decimal" placeholder="P(g)" style="flex:1">
+      </div>
+      <button class="btn full sm" style="margin-top:8px" onclick="addCustom()">追加して「マイ」に保存</button>
+    </div>
+
+    <div class="card">
+      <h3>今日食べたもの <span id="mealTotal" style="float:right;color:var(--accent)"></span></h3>
+      <div id="eatenList"></div>
+    </div>
+  </section>
+
+  <!-- ========== トレ ========== -->
+  <section id="v-train" class="hide">
+    <div class="card">
+      <h3>ウォーキング</h3>
+      <div class="row between">
+        <div><b style="font-size:17px" id="walkMin">20</b> <span class="muted">分</span>
+          <span class="muted" id="walkKcal" style="margin-left:8px"></span></div>
+        <div class="row" style="gap:6px">
+          <button class="btn sm" onclick="addWalk(-10)">−10</button>
+          <button class="btn sm" onclick="addWalk(10)">+10</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row between" style="margin-bottom:10px">
+        <h3 style="margin:0" id="wkTitle">—</h3>
+        <button class="btn sm ghost" onclick="swapDay()">A/B切替</button>
+      </div>
+      <div id="exList"></div>
+      <div class="muted" style="text-align:center;margin-top:10px" id="wkProgress"></div>
+    </div>
+
+    <div class="card">
+      <h3>やり方メモ</h3>
+      <div class="tip" id="wkTips"></div>
+    </div>
+  </section>
+
+  <!-- ========== 記録 ========== -->
+  <section id="v-graph" class="hide">
+    <div class="card">
+      <h3>体重の推移と予測</h3>
+      <canvas id="chart" height="440"></canvas>
+      <div class="legend">
+        <span><i style="background:#f0b429"></i>実測</span>
+        <span><i style="background:#5aa9f7"></i>7日平均</span>
+        <span><i style="background:#3ecf8e"></i>目標ペース</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>週まとめ</h3>
+      <div id="weekly"></div>
+    </div>
+    <div class="card">
+      <h3>直近14日</h3>
+      <table class="log"><thead><tr><th>日付</th><th>体重</th><th>摂取</th><th>運動</th><th>収支</th></tr></thead>
+      <tbody id="logBody"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ========== 設定 ========== -->
+  <section id="v-set" class="hide">
+    <div class="card">
+      <h3>あなたの情報</h3>
+      <div class="row" style="gap:8px">
+        <label class="f" style="flex:1"><span>身長(cm)</span><input type="number" id="sHeight" inputmode="decimal"></label>
+        <label class="f" style="flex:1"><span>年齢</span><input type="number" id="sAge" inputmode="numeric"></label>
+      </div>
+      <label class="f"><span>性別（基礎代謝の計算に使用）</span>
+        <select id="sSex"><option value="male">男性</option><option value="female">女性</option></select></label>
+      <label class="f"><span>日常の活動量（運動を除く）</span>
+        <select id="sAct">
+          <option value="1.2">ほぼ座っている（デスクワーク中心）</option>
+          <option value="1.3">やや動く（外回りが少しある）</option>
+          <option value="1.4">よく動く（立ち仕事・外回り中心）</option>
+          <option value="1.55">かなり動く（力仕事）</option>
+        </select></label>
+    </div>
+
+    <div class="card">
+      <h3>目標</h3>
+      <div class="row" style="gap:8px">
+        <label class="f" style="flex:1"><span>開始体重(kg)</span><input type="number" id="sStartW" step="0.1" inputmode="decimal"></label>
+        <label class="f" style="flex:1"><span>目標体重(kg)</span><input type="number" id="sGoalW" step="0.1" inputmode="decimal"></label>
+      </div>
+      <div class="row" style="gap:8px">
+        <label class="f" style="flex:1"><span>開始日</span><input type="date" id="sStartD"></label>
+        <label class="f" style="flex:1"><span>目標日</span><input type="date" id="sGoalD"></label>
+      </div>
+      <button class="btn pri full" onclick="saveSettings()">保存する</button>
+      <div id="setCalc" class="tiny" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>バックアップ</h3>
+      <div id="bkStatus" class="tiny" style="margin-bottom:10px"></div>
+      <div class="tiny" style="margin-bottom:10px">
+        記録はこのブラウザの中だけに保存されています。Safariの履歴やサイトデータを消すと記録も消えます。
+        また、<b style="color:var(--fg)">7日以上このアプリを開かないと、iPhoneが自動でデータを消すことがあります</b>。
+        月1回は書き出しておいてください。
+      </div>
+      <button class="btn full sm" onclick="exportData()" style="margin-bottom:8px">記録をファイルに書き出す</button>
+      <button class="btn full sm" onclick="document.getElementById('impFile').click()" style="margin-bottom:8px">書き出したファイルから復元</button>
+      <input type="file" id="impFile" accept=".json" class="hide" onchange="importData(this)">
+      <button class="btn dngr full sm" onclick="resetAll()">すべての記録を消す</button>
+    </div>
+
+    <div class="card">
+      <h3>使い方</h3>
+      <div class="tiny">
+        <b style="color:var(--fg)">ホーム画面に追加すると本物のアプリになります</b><br>
+        Safariで開く → 下の共有ボタン（□に↑）→「ホーム画面に追加」<br><br>
+        <b style="color:var(--fg)">記録の考え方</b><br>
+        体重は水分で1〜2kg簡単に動きます。前日比ではなく「記録タブの青い線（7日平均）」だけを見てください。これが下がっていれば順調です。<br><br>
+        <b style="color:var(--fg)">食べすぎた日</b><br>
+        1日の失敗では太りません。翌日いつも通りに戻せば問題ありません。記録をやめることだけが唯一の失敗です。
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button id="n-home"  onclick="go('home')" class="on"><span class="ic">◎</span><span class="lb">今日</span></button>
+  <button id="n-meal"  onclick="go('meal')"><span class="ic">🍚</span><span class="lb">食事</span></button>
+  <button id="n-train" onclick="go('train')"><span class="ic">💪</span><span class="lb">トレ</span></button>
+  <button id="n-graph" onclick="go('graph')"><span class="ic">📈</span><span class="lb">記録</span></button>
+  <button id="n-set"   onclick="go('set')"><span class="ic">⚙</span><span class="lb">設定</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   BodyLog — 単一HTMLのダイエット記録アプリ
+   データはすべて localStorage（この端末の中）にのみ保存
+   ========================================================= */
+
+const KEY = 'bodylog_v1';
+
+/* ---------- 初期設定 ---------- */
+const DEFAULTS = {
+  settings:{
+    height:170, age:30, sex:'male', act:1.3,
+    startW:70, goalW:65,
+    startD:isoToday(), goalD:addDays(isoToday(),90),
+    walkDefault:20,
+    onboarded:false          // 初回セットアップ済みか
+  },
+  days:{},        // 'YYYY-MM-DD' : { w, meals[], walk, wk:{type,sets{}}, easy }
+  myFoods:[],     // {n,k,p}
+  useCount:{},    // 食品名 : 回数
+  lastBackup:null // 最後にファイル書き出しした日
+};
+
+let DB = load();
+let cur = isoToday();      // 表示中の日付
+let view = 'home';
+let mealTime = autoTime(); // 朝/昼/夜/間食
+let amt = 1;               // 量の倍率
+let cat = 'よく使う';
+
+/* =========================================================
+   食品プリセット  [名前, kcal, タンパク質g]
+   ========================================================= */
+const FOODS = {
+'主食':[
+ ['ごはん 小(100g)',156,2.5],['ごはん 普通(150g)',234,3.8],['ごはん 大盛(200g)',312,5.0],
+ ['玄米ごはん(150g)',228,4.2],['オートミール(30g)',114,4.1],['食パン6枚切1枚',149,5.3],
+ ['おにぎり1個',180,3.0],['そば1人前',296,9.6],['うどん1玉',242,6.0],
+ ['パスタ(乾100g)',356,12.9],['ラーメン1杯',500,20],['カレーライス',700,15],
+ ['牛丼 並',650,20],['チャーハン',700,15]
+],
+'主菜':[
+ ['鶏むね 皮なし100g',105,23],['鶏むね 皮なし150g',158,34],['ささみ100g',98,23],
+ ['サラダチキン1個',110,23],['鶏もも 皮なし100g',113,19],['鶏もも 皮つき100g',190,17],
+ ['豚ロース100g',248,19],['豚バラ100g',366,14],['牛赤身100g',182,21],
+ ['卵1個',76,6.2],['卵2個',152,12.4],['納豆1パック',100,8.3],
+ ['豆腐 半丁(150g)',84,7.4],['サバ缶 水煮1缶',340,37],['ツナ缶 水煮',50,11],
+ ['鮭 切身1切',106,17],['ちくわ2本',60,6],['プロテイン1杯',120,20],
+ ['ギリシャヨーグルト100g',60,10],['唐揚げ3個',300,18],['ハンバーグ1個',400,20]
+],
+'副菜':[
+ ['サラダ(ドレなし)',30,1.5],['サラダ(ドレあり)',100,1.5],['冷奴',60,5],
+ ['キムチ50g',25,1],['ブロッコリー100g',37,5.4],['ほうれん草おひたし',25,2],
+ ['野菜炒め',180,6],['ひじき煮',80,2],['ポテトサラダ',170,2],
+ ['フライドポテトM',330,4],['餃子5個',250,10],['枝豆100g',125,11]
+],
+'汁物':[
+ ['味噌汁1杯',40,2.5],['豚汁1杯',130,7],['わかめスープ',20,1],
+ ['コンソメスープ',25,1],['豆乳スープ',110,6]
+],
+'飲み物':[
+ ['水・お茶・ブラックコーヒー',0,0],['牛乳200ml',138,6.8],['無調整豆乳200ml',92,7.2],
+ ['カフェラテ',100,5],['野菜ジュース200ml',70,1],['スポーツドリンク500ml',125,0],
+ ['コーラ500ml',225,0],['ビール350ml',140,0],['ビール500ml',200,0],
+ ['ハイボール1杯',70,0],['焼酎 水割り1杯',100,0],['日本酒1合',196,0],
+ ['ワイン1杯',90,0],['レモンサワー1缶',150,0]
+],
+'間食':[
+ ['ナッツ25g',150,5],['プロテインバー',200,15],['ヨーグルト無糖100g',56,3.6],
+ ['バナナ1本',86,1.1],['りんご半分',60,0.2],['チョコ1枚(50g)',279,3],
+ ['ポテチ1袋(60g)',336,3],['アイス1個',200,4],['どら焼き1個',220,5],
+ ['菓子パン1個',350,6],['カップ麺1個',350,8],['せんべい2枚',90,1.5],
+ ['からあげクン5個',220,15],['コンビニおでん3個',100,8]
+],
+'外食':[
+ ['定食(一般)',800,30],['唐揚げ定食',950,35],['天ぷらそば',450,15],
+ ['寿司10貫',500,25],['ハンバーガーセット',900,25],['ピザ2切',500,20],
+ ['焼肉(食べ放題)',1200,60],['居酒屋 数品',700,30],['ステーキ200g',450,45],
+ ['パスタ(外食)',700,20],['丼もの(外食)',750,25]
+]
+};
+
+/* =========================================================
+   筋トレメニュー
+   ========================================================= */
+const WORKOUTS = {
+A:{ name:'Aの日 — 下半身', items:[
+  {id:'bulg', n:'ブルガリアンスクワット', d:'左右 各10回 × 3セット', sets:3},
+  {id:'hip',  n:'ヒップリフト',           d:'15回 × 3セット', sets:3},
+  {id:'calf', n:'カーフレイズ',           d:'20回 × 3セット', sets:3},
+  {id:'plank',n:'プランク',               d:'30秒 × 3セット', sets:3}
+], tip:
+ '<b>ブルガリアンスクワット</b>：椅子やベッドに片足の甲を乗せ、前足でしゃがむ。前足のかかとで床を押して立つ意識。膝がつま先より大きく前に出ないように。<br><br>'+
+ '<b>ヒップリフト</b>：仰向けで膝を立て、お尻を持ち上げて2秒静止。お尻を締める感覚が出れば正解。<br><br>'+
+ '<b>カーフレイズ</b>：段差につま先を乗せてかかとを上下。ふくらはぎは血流ポンプなので浮腫み対策にもなります。<br><br>'+
+ '<b>プランク</b>：肘とつま先で体を一直線に。腰が落ちると効きません。30秒がきつければ20秒でOK。'
+},
+B:{ name:'Bの日 — 上半身', items:[
+  {id:'push', n:'腕立て伏せ',             d:'15回 × 3セット', sets:3},
+  {id:'pike', n:'パイクプッシュアップ',   d:'8回 × 3セット（肩）', sets:3},
+  {id:'dip',  n:'椅子ディップス',         d:'10回 × 3セット（二の腕）', sets:3},
+  {id:'leg',  n:'レッグレイズ',           d:'12回 × 3セット（腹）', sets:3}
+], tip:
+ '<b>腕立て伏せ</b>：手は肩幅より少し広め。胸を床すれすれまで下ろす。15回×3が余裕になったら、手幅を広げるか足を高い所に乗せて負荷を上げます（回数を増やすより効率的）。<br><br>'+
+ '<b>パイクプッシュアップ</b>：お尻を高く上げた「く」の字で、頭を床に向けて下ろす。肩の前側に効きます。肩は服のシルエットを一番変える部位です。<br><br>'+
+ '<b>椅子ディップス</b>：椅子に後ろ手をつき、肘を曲げて体を沈める。肘は外に開かず後ろへ。<br><br>'+
+ '<b>レッグレイズ</b>：仰向けで足を伸ばしたまま上下。腰が浮くならお尻の下に手を入れる。腹筋は体脂肪が落ちれば見えます。'
+}};
+
+/* =========================================================
+   保存 / 読み込み
+   ========================================================= */
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULTS));
+    const d = JSON.parse(raw);
+    d.settings = Object.assign({}, DEFAULTS.settings, d.settings||{});
+    d.days = d.days||{}; d.myFoods = d.myFoods||[]; d.useCount = d.useCount||{};
+    if(d.lastBackup === undefined) d.lastBackup = null;
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function day(k){
+  k = k||cur;
+  if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, wk:{type:autoType(k), sets:{}}, easy:false };
+  if(!DB.days[k].wk) DB.days[k].wk = { type:autoType(k), sets:{} };
+  return DB.days[k];
+}
+
+/* =========================================================
+   日付ユーティリティ
+   ========================================================= */
+function isoToday(){ const d=new Date(); return iso(d); }
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function addDays(k,n){ const d=new Date(k+'T12:00'); d.setDate(d.getDate()+n); return iso(d); }
+function diffDays(a,b){ return Math.round((new Date(b+'T12:00') - new Date(a+'T12:00'))/86400000); }
+function wd(k){ return ['日','月','火','水','木','金','土'][new Date(k+'T12:00').getDay()]; }
+function autoTime(){ const h=new Date().getHours(); return h<10?'朝':h<15?'昼':h<21?'夜':'間食'; }
+function autoType(k){ return (diffDays(DB.settings.startD, k) % 2 === 0) ? 'A' : 'B'; }
+
+/* =========================================================
+   カロリー計算
+   ========================================================= */
+function curWeight(k){
+  k = k||cur;
+  // その日の記録 → なければ直近過去 → なければ開始体重
+  const keys = Object.keys(DB.days).filter(d=>DB.days[d].w && d<=k).sort();
+  if(DB.days[k] && DB.days[k].w) return DB.days[k].w;
+  if(keys.length) return DB.days[keys[keys.length-1]].w;
+  return DB.settings.startW;
+}
+function bmr(w){
+  const s = DB.settings;
+  return s.sex==='male'
+    ? 10*w + 6.25*s.height - 5*s.age + 5
+    : 10*w + 6.25*s.height - 5*s.age - 161;
+}
+function baseBurn(k){ return Math.round(bmr(curWeight(k)) * DB.settings.act); }
+function exBurn(k){
+  const d = day(k), w = curWeight(k);
+  const walk = 3.5 * w * (d.walk/60) * 1.05;
+  const setsDone = Object.values(d.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
+  const trainMin = setsDone * 1.3;                       // 1セット≒1.3分（休憩込み）
+  const train = 5.0 * w * (trainMin/60) * 1.05;
+  return Math.round(walk + train);
+}
+function intake(k){ return Math.round(day(k).meals.reduce((a,m)=>a+m.k,0)); }
+function protein(k){ return Math.round(day(k).meals.reduce((a,m)=>a+(m.p||0),0)); }
+/* 目標達成に必要な1日の赤字（遅れると自動で増える。上限1000kcal） */
+function needDeficit(k){
+  const s = DB.settings;
+  const left = curWeight(k) - s.goalW;
+  const daysLeft = Math.max(1, diffDays(k, s.goalD));
+  return Math.min(1000, Math.max(0, Math.round(left*7200/daysLeft)));
+}
+function targetIntake(k){
+  const t = baseBurn(k) + exBurn(k) - needDeficit(k);
+  return Math.max(1300, Math.round(t));   // 1300kcalを下限（下回ると筋肉が落ちる）
+}
+
+/* =========================================================
+   画面切替
+   ========================================================= */
+function go(v){
+  view = v;
+  ['home','meal','train','graph','set'].forEach(x=>{
+    document.getElementById('v-'+x).classList.toggle('hide', x!==v);
+    document.getElementById('n-'+x).classList.toggle('on', x===v);
+  });
+  window.scrollTo(0,0);
+  render();
+}
+function moveDay(n){ cur = addDays(cur,n); render(); }
+function goToday(){ cur = isoToday(); render(); }
+
+/* =========================================================
+   描画
+   ========================================================= */
+function render(){
+  // ヘッダ
+  const d = new Date(cur+'T12:00');
+  document.getElementById('hDate').textContent = (d.getMonth()+1)+'月'+d.getDate()+'日('+wd(cur)+')';
+  const dl = diffDays(cur, DB.settings.goalD);
+  document.getElementById('hSub').textContent = cur===isoToday()
+    ? '目標まであと'+dl+'日' : (diffDays(isoToday(),cur)<0?'過去の記録':'未来の日付');
+  document.getElementById('hToday').classList.toggle('on', cur===isoToday());
+
+  if(view==='home')  renderHome();
+  if(view==='meal')  renderMeal();
+  if(view==='train') renderTrain();
+  if(view==='graph') renderGraph();
+  if(view==='set')   renderSet();
+}
+
+/* ---------- 今日 ---------- */
+function renderHome(){
+  const D = day(), tgt = targetIntake(cur), got = intake(cur), burn = exBurn(cur);
+  const left = tgt - got;
+  const el = document.getElementById('bLeft');
+  el.textContent = Math.abs(left); el.classList.toggle('over', left<0);
+  const pct = Math.min(100, got/Math.max(tgt,1)*100);
+  const bar = document.getElementById('bBar');
+  bar.style.width = pct+'%'; bar.classList.toggle('over', left<0);
+  document.getElementById('bSub').textContent =
+    left<0 ? ('目安を '+(-left)+'kcal オーバー　目安 '+tgt+'kcal')
+           : ('今日の目安 '+tgt+'kcal ／ 生活代謝 '+baseBurn(cur)+'kcal');
+  document.getElementById('kIn').textContent   = got;
+  document.getElementById('kBurn').textContent = burn;
+  const pNeed = Math.round(curWeight(cur)*1.6);
+  const pEl = document.getElementById('kP');
+  pEl.textContent = protein(cur)+'g';
+  pEl.style.color = protein(cur) >= pNeed ? 'var(--good)' : '';
+
+  // 体重
+  document.getElementById('wIn').value = D.w || '';
+  const prev = prevWeight(cur);
+  document.getElementById('wSub').innerHTML = D.w
+    ? ('記録済み'+(prev? '　前回比 '+sgn(D.w-prev)+'kg':'')+'　目標まで '+(D.w-DB.settings.goalW).toFixed(1)+'kg')
+    : ('目標タンパク質 '+pNeed+'g／日　（体重を入れると精度が上がります）');
+
+  // タスク
+  tk('t-weight', !!D.w);
+  tk('t-walk', D.walk>0);
+  document.getElementById('walkN').textContent = D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分';
+  const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
+  const total = WORKOUTS[D.wk.type].items.reduce((a,i)=>a+i.sets,0);
+  tk('t-train', done>=total);
+  document.getElementById('trainN').textContent = WORKOUTS[D.wk.type].name+'　'+done+'/'+total+'セット';
+  tk('t-meal', D.meals.length>0);
+  document.getElementById('mealN').textContent = D.meals.length? D.meals.length+'件 '+got+'kcal' : 'まだ0件';
+  document.getElementById('easyBtn').textContent = D.easy? '「ゆるめ」を解除する' : '今日はゆるめでいく';
+  document.getElementById('easyBtn').classList.toggle('pri', D.easy);
+
+  // ストリーク
+  document.getElementById('sStreak').textContent = streak();
+  const w = curWeight(cur);
+  document.getElementById('sDown').textContent = sgn(w - DB.settings.startW);
+  document.getElementById('sLeft').textContent = (w - DB.settings.goalW).toFixed(1);
+
+  // ペース判定
+  const need = needDeficit(cur);
+  const planned = diffDays(DB.settings.startD, DB.settings.goalD);
+  const passed = Math.max(0, diffDays(DB.settings.startD, cur));
+  const should = DB.settings.startW - (DB.settings.startW-DB.settings.goalW) * (passed/Math.max(planned,1));
+  let msg;
+  if(!Object.keys(DB.days).some(k=>DB.days[k].w)) msg = 'まず今日の体重を記録してください';
+  else if(w <= should) msg = '<span style="color:var(--good)">予定ペースより '+(should-w).toFixed(1)+'kg 先行中。順調です</span>';
+  else msg = '予定より '+(w-should).toFixed(1)+'kg 遅れ。1日の赤字目標を '+need+'kcal に自動調整しました';
+  document.getElementById('paceMsg').innerHTML = msg;
+
+  // バックアップ督促（30日以上ほったらかしのとき）
+  const bw = document.getElementById('bkWarn');
+  const nDays = Object.keys(DB.days).length;
+  const since = DB.lastBackup ? diffDays(DB.lastBackup, isoToday()) : null;
+  if(nDays >= 7 && (since === null || since >= 30)){
+    bw.innerHTML = (since===null ? 'まだ一度もバックアップしていません。' : 'バックアップから'+since+'日経ちました。')+
+      '<br>記録が消える前に、<b>設定タブ →「記録をファイルに書き出す」</b>を押してください。';
+    bw.classList.remove('hide');
+  } else bw.classList.add('hide');
+}
+function tk(id, on){ document.getElementById(id).classList.toggle('done', on); }
+function sgn(v){ return (v>0?'+':'')+v.toFixed(1); }
+function prevWeight(k){
+  const ks = Object.keys(DB.days).filter(d=>DB.days[d].w && d<k).sort();
+  return ks.length? DB.days[ks[ks.length-1]].w : null;
+}
+function streak(){
+  let n=0, k=isoToday();
+  if(!(DB.days[k] && (DB.days[k].w || DB.days[k].easy))) k = addDays(k,-1); // 今日未入力でも昨日から数える
+  while(DB.days[k] && (DB.days[k].w || DB.days[k].easy)){ n++; k = addDays(k,-1); }
+  return n;
+}
+function saveWeight(){
+  const v = parseFloat(document.getElementById('wIn').value);
+  if(!v || v<30 || v>200){ toast('体重を入力してください'); return; }
+  day().w = Math.round(v*10)/10; save(); render(); toast('記録しました');
+  document.getElementById('wIn').blur();
+}
+function focusWeight(){ document.getElementById('wIn').focus(); }
+function toggleWalk(){
+  const D = day();
+  D.walk = D.walk>0 ? 0 : DB.settings.walkDefault;
+  save(); render(); toast(D.walk>0? 'ウォーキング完了！' : '取り消しました');
+}
+function toggleEasy(){
+  const D = day(); D.easy = !D.easy; save(); render();
+  toast(D.easy? '記録は途切れません。明日また。' : '解除しました');
+}
+
+/* ---------- 食事 ---------- */
+function renderMeal(){
+  // 時間帯
+  const seg = document.getElementById('segTime');
+  seg.innerHTML = ['朝','昼','夜','間食'].map(t=>
+    '<button class="'+(t===mealTime?'on':'')+'" onclick="mealTime=\''+t+'\';renderMeal()">'+t+'</button>').join('');
+  // 量
+  document.getElementById('segAmt').innerHTML = [0.5,1,1.5,2].map(a=>
+    '<button class="'+(a===amt?'on':'')+'" onclick="amt='+a+';renderMeal()">'+(a===1?'ふつう':'×'+a)+'</button>').join('');
+  // カテゴリ
+  const cats = ['よく使う'].concat(Object.keys(FOODS)).concat(['マイ']);
+  document.getElementById('catChips').innerHTML = cats.map(c=>
+    '<button class="'+(c===cat?'on':'')+'" onclick="cat=\''+c+'\';renderMeal()">'+c+'</button>').join('');
+  // 一覧
+  let list;
+  if(cat==='よく使う'){
+    const all = Object.values(FOODS).flat().concat(DB.myFoods.map(f=>[f.n,f.k,f.p]));
+    list = all.filter(f=>DB.useCount[f[0]]).sort((a,b)=>DB.useCount[b[0]]-DB.useCount[a[0]]).slice(0,12);
+    if(!list.length) list = [['ごはん 普通(150g)',234,3.8],['卵1個',76,6.2],['納豆1パック',100,8.3],
+                             ['サラダチキン1個',110,23],['味噌汁1杯',40,2.5],['サラダ(ドレなし)',30,1.5]];
+  } else if(cat==='マイ'){
+    list = DB.myFoods.map(f=>[f.n,f.k,f.p]);
+    if(!list.length) list = [];
+  } else list = FOODS[cat];
+
+  document.getElementById('foodGrid').innerHTML = list.length ? list.map(f=>
+    '<button class="food" onclick="addFood('+JSON.stringify(JSON.stringify(f)).replace(/"/g,'&quot;')+')">'+
+    '<span class="fn">'+esc(f[0])+'</span>'+
+    '<span class="fk">'+Math.round(f[1]*amt)+' kcal<i>P '+(f[2]*amt).toFixed(1)+'g</i></span></button>'
+  ).join('') : '<div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">まだありません</div>';
+
+  // 食べたもの
+  const D = day();
+  document.getElementById('mealTotal').textContent = intake(cur)+' kcal / P'+protein(cur)+'g';
+  document.getElementById('eatenList').innerHTML = D.meals.length ? D.meals.map((m,i)=>
+    '<div class="eaten"><div class="en">'+esc(m.n)+'<small>'+m.t+'</small></div>'+
+    '<div class="ek">'+m.k+'</div><button class="del" onclick="delMeal('+i+')">×</button></div>').join('')
+    : '<div class="muted" style="text-align:center;padding:14px">まだ記録がありません</div>';
+}
+function addFood(json){
+  const f = JSON.parse(json);
+  const name = amt===1 ? f[0] : f[0]+' ×'+amt;
+  day().meals.push({ n:name, k:Math.round(f[1]*amt), p:Math.round(f[2]*amt*10)/10, t:mealTime });
+  DB.useCount[f[0]] = (DB.useCount[f[0]]||0)+1;
+  save(); renderMeal(); toast('+'+Math.round(f[1]*amt)+' kcal');
+}
+function delMeal(i){ day().meals.splice(i,1); save(); renderMeal(); }
+function addCustom(){
+  const n = document.getElementById('cfName').value.trim();
+  const k = parseInt(document.getElementById('cfKcal').value);
+  const p = parseFloat(document.getElementById('cfP').value)||0;
+  if(!n || !k){ toast('名前とkcalを入れてください'); return; }
+  day().meals.push({n:n, k:k, p:p, t:mealTime});
+  if(!DB.myFoods.some(f=>f.n===n)) DB.myFoods.push({n:n,k:k,p:p});
+  DB.useCount[n] = (DB.useCount[n]||0)+1;
+  document.getElementById('cfName').value=''; document.getElementById('cfKcal').value=''; document.getElementById('cfP').value='';
+  save(); renderMeal(); toast('追加しました');
+}
+
+/* ---------- トレーニング ---------- */
+function renderTrain(){
+  const D = day(), W = WORKOUTS[D.wk.type], w = curWeight(cur);
+  document.getElementById('walkMin').textContent = D.walk;
+  document.getElementById('walkKcal').textContent = '≒ '+Math.round(3.5*w*(D.walk/60)*1.05)+' kcal';
+  document.getElementById('wkTitle').textContent = W.name;
+  document.getElementById('wkTips').innerHTML = W.tip;
+
+  document.getElementById('exList').innerHTML = W.items.map(it=>{
+    const done = (D.wk.sets[it.id]||0);
+    const btns = Array.from({length:it.sets}, (_,i)=>
+      '<button class="'+(i<done?'on':'')+'" onclick="setDone(\''+it.id+'\','+(i+1)+')">'+(i+1)+'</button>').join('');
+    return '<div class="ex"><div class="exh"><div><div class="exn">'+it.n+'</div>'+
+           '<div class="exd">'+it.d+'</div></div></div><div class="sets">'+btns+'</div></div>';
+  }).join('');
+
+  const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
+  const total = W.items.reduce((a,i)=>a+i.sets,0);
+  document.getElementById('wkProgress').innerHTML = done>=total
+    ? '<span style="color:var(--good);font-weight:700">今日のトレーニング完了！</span>'
+    : done+' / '+total+' セット　（残り約'+Math.max(1,Math.round((total-done)*1.3))+'分）';
+}
+function setDone(id, n){
+  const D = day();
+  D.wk.sets[id] = (D.wk.sets[id]===n) ? n-1 : n;   // 同じ番号を再タップで1つ戻す
+  save(); renderTrain();
+}
+function addWalk(n){
+  const D = day(); D.walk = Math.max(0, D.walk + n); save(); renderTrain();
+}
+function swapDay(){
+  const D = day(); D.wk.type = D.wk.type==='A'?'B':'A'; D.wk.sets = {}; save(); renderTrain();
+}
+
+/* ---------- 記録・グラフ ---------- */
+function renderGraph(){
+  drawChart();
+  // 週まとめ
+  const rows = [];
+  for(let i=0;i<4;i++){
+    const end = addDays(isoToday(), -i*7), start = addDays(end,-6);
+    const ws = [];
+    let kc=0, days=0;
+    for(let j=0;j<7;j++){
+      const k = addDays(start,j), D = DB.days[k];
+      if(!D) continue;
+      if(D.w) ws.push(D.w);
+      if(D.meals && D.meals.length){ kc += D.meals.reduce((a,m)=>a+m.k,0); days++; }
+    }
+    if(!ws.length && !days) continue;
+    rows.push('<div class="row between" style="padding:9px 0;border-bottom:1px solid var(--line)">'+
+      '<div><b style="font-size:13px">'+start.slice(5).replace('-','/')+'〜'+end.slice(5).replace('-','/')+'</b>'+
+      '<div class="tiny">'+(days?'記録'+days+'日・平均 '+Math.round(kc/days)+'kcal':'食事記録なし')+'</div></div>'+
+      '<div style="text-align:right"><b style="font-size:16px">'+(ws.length?ws[ws.length-1].toFixed(1)+'kg':'—')+'</b>'+
+      '<div class="tiny">'+(ws.length>1? sgn(ws[ws.length-1]-ws[0])+'kg':'')+'</div></div></div>');
+  }
+  document.getElementById('weekly').innerHTML = rows.length? rows.join('') : '<div class="muted">まだデータがありません</div>';
+
+  // 直近14日
+  const tb = [];
+  for(let i=0;i<14;i++){
+    const k = addDays(isoToday(),-i), D = DB.days[k];
+    if(!D) continue;
+    const inK = D.meals.reduce((a,m)=>a+m.k,0), bn = exBurn(k);
+    const bal = inK ? (inK - baseBurn(k) - bn) : null;
+    tb.push('<tr><td>'+k.slice(5).replace('-','/')+'('+wd(k)+')</td>'+
+      '<td>'+(D.w? D.w.toFixed(1):'—')+'</td><td>'+(inK||'—')+'</td><td>'+(bn||'—')+'</td>'+
+      '<td style="color:'+(bal===null?'var(--dim2)':(bal<0?'var(--good)':'var(--bad)'))+'">'+
+      (bal===null?'—':(bal>0?'+':'')+bal)+'</td></tr>');
+  }
+  document.getElementById('logBody').innerHTML = tb.length? tb.join('') : '<tr><td colspan="5" class="muted">記録なし</td></tr>';
+}
+function drawChart(){
+  const cv = document.getElementById('chart'), s = DB.settings;
+  const dpr = window.devicePixelRatio||1;
+  const W = cv.clientWidth, H = 220;
+  cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+  const g = cv.getContext('2d'); g.scale(dpr,dpr); g.clearRect(0,0,W,H);
+
+  const pad = {l:34,r:10,t:14,b:20};
+  const x0 = pad.l, x1 = W-pad.r, y0 = pad.t, y1 = H-pad.b;
+  const data = Object.keys(DB.days).filter(k=>DB.days[k].w).sort();
+
+  // X範囲：開始日〜目標日。ただし記録がその外側にあれば、はみ出さないよう広げる
+  const first = (data.length && data[0]   < s.startD) ? data[0]                : s.startD;
+  const last  = (data.length && data[data.length-1] > s.goalD) ? data[data.length-1] : s.goalD;
+  const total = Math.max(7, diffDays(first, last));
+
+  // Y範囲
+  let vals = data.map(k=>DB.days[k].w).concat([s.startW, s.goalW]);
+  let mx = Math.max(...vals)+0.8, mn = Math.min(...vals)-0.8;
+  const X = k => x0 + (x1-x0) * Math.min(1, Math.max(0, diffDays(first,k)/total));
+  const Y = v => y1 - (y1-y0) * ((v-mn)/Math.max(0.1,(mx-mn)));
+
+  // グリッド
+  g.font = '10px -apple-system,sans-serif'; g.textAlign='right'; g.textBaseline='middle';
+  for(let i=0;i<=4;i++){
+    const v = mn + (mx-mn)*i/4, y = Y(v);
+    g.strokeStyle = '#252a34'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(x0,y); g.lineTo(x1,y); g.stroke();
+    g.fillStyle = '#5f6675'; g.fillText(v.toFixed(1), x0-5, y);
+  }
+  // 目標ペース線
+  g.strokeStyle='#3ecf8e'; g.lineWidth=2; g.setLineDash([5,4]);
+  g.beginPath(); g.moveTo(X(s.startD), Y(s.startW)); g.lineTo(X(s.goalD), Y(s.goalW)); g.stroke();
+  g.setLineDash([]);
+  // 今日の縦線
+  const tx = X(isoToday());
+  g.strokeStyle='#3a4150'; g.lineWidth=1; g.beginPath(); g.moveTo(tx,y0); g.lineTo(tx,y1); g.stroke();
+
+  if(data.length){
+    // 7日移動平均
+    const avg = data.map((k,i)=>{
+      const win = data.slice(Math.max(0,i-6), i+1);
+      return [k, win.reduce((a,d)=>a+DB.days[d].w,0)/win.length];
+    });
+    if(avg.length>1){
+      g.strokeStyle='#5aa9f7'; g.lineWidth=2.5; g.beginPath();
+      avg.forEach(([k,v],i)=> i? g.lineTo(X(k),Y(v)) : g.moveTo(X(k),Y(v)));
+      g.stroke();
+    }
+    // 実測点
+    g.strokeStyle='rgba(240,180,41,.5)'; g.lineWidth=1.5; g.beginPath();
+    data.forEach((k,i)=> i? g.lineTo(X(k),Y(DB.days[k].w)) : g.moveTo(X(k),Y(DB.days[k].w)));
+    g.stroke();
+    g.fillStyle='#f0b429';
+    data.forEach(k=>{ g.beginPath(); g.arc(X(k),Y(DB.days[k].w),2.8,0,7); g.fill(); });
+  }
+  // 軸ラベル
+  g.textAlign='left'; g.fillStyle='#5f6675'; g.textBaseline='top';
+  g.fillText(first.slice(5).replace('-','/'), x0, y1+5);
+  g.textAlign='right'; g.fillText(last.slice(5).replace('-','/'), x1, y1+5);
+}
+
+/* ---------- 設定 ---------- */
+function renderSet(){
+  const s = DB.settings;
+  document.getElementById('sHeight').value = s.height;
+  document.getElementById('sAge').value    = s.age;
+  document.getElementById('sSex').value    = s.sex;
+  document.getElementById('sAct').value    = s.act;
+  document.getElementById('sStartW').value = s.startW;
+  document.getElementById('sGoalW').value  = s.goalW;
+  document.getElementById('sStartD').value = s.startD;
+  document.getElementById('sGoalD').value  = s.goalD;
+
+  const w = curWeight(cur), b = Math.round(bmr(w)), base = baseBurn(cur);
+  const need = needDeficit(cur), tgt = targetIntake(cur);
+  const days = Math.max(1, diffDays(isoToday(), s.goalD));
+  const perWeek = (w-s.goalW)/days*7;
+  let warn = '';
+  if(perWeek > w*0.01)
+    warn = '<div class="warn" style="margin-top:10px">今のペース設定は週 '+perWeek.toFixed(2)+
+           'kg減。体重の1%（'+(w*0.01).toFixed(2)+'kg）を超えており、筋肉が落ちやすい領域です。'+
+           '目標日を2〜4週間うしろにずらすと、同じ見た目でも維持しやすい体になります。</div>';
+  document.getElementById('setCalc').innerHTML =
+    '<b style="color:var(--fg)">今の設定での計算</b><br>'+
+    '基礎代謝 '+b+' kcal（何もしなくても消費）<br>'+
+    '生活代謝 '+base+' kcal（基礎代謝 × '+s.act+'）<br>'+
+    '必要な赤字 '+need+' kcal／日（残り'+days+'日で '+(w-s.goalW).toFixed(1)+'kg）<br>'+
+    '<b style="color:var(--accent)">→ 1日の摂取目安 '+tgt+' kcal</b>　タンパク質 '+Math.round(w*1.6)+'g 以上'+warn;
+
+  const since = DB.lastBackup ? diffDays(DB.lastBackup, isoToday()) : null;
+  document.getElementById('bkStatus').innerHTML = since===null
+    ? '<b style="color:var(--bad)">まだ一度も書き出していません</b>'
+    : (since===0 ? '<b style="color:var(--good)">今日 書き出し済み</b>'
+                 : '最後の書き出し：'+since+'日前'+(since>=30?'　<b style="color:var(--bad)">← そろそろ書き出してください</b>':''));
+}
+function saveSettings(){
+  const s = DB.settings;
+  s.height = parseFloat(document.getElementById('sHeight').value)||s.height;
+  s.age    = parseInt(document.getElementById('sAge').value)||s.age;
+  s.sex    = document.getElementById('sSex').value;
+  s.act    = parseFloat(document.getElementById('sAct').value);
+  s.startW = parseFloat(document.getElementById('sStartW').value)||s.startW;
+  s.goalW  = parseFloat(document.getElementById('sGoalW').value)||s.goalW;
+  s.startD = document.getElementById('sStartD').value||s.startD;
+  s.goalD  = document.getElementById('sGoalD').value||s.goalD;
+  save(); renderSet(); toast('保存しました');
+}
+
+/* ---------- バックアップ ---------- */
+function exportData(){
+  const blob = new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bodylog-'+isoToday()+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  DB.lastBackup = isoToday(); save(); renderSet();
+  toast('書き出しました');
+}
+function importData(inp){
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try{
+      const d = JSON.parse(e.target.result);
+      if(!d.settings || !d.days) throw 0;
+      if(!confirm('現在の記録を、読み込むファイルの内容で上書きします。よろしいですか？')) return;
+      DB = d; DB.settings = Object.assign({}, DEFAULTS.settings, DB.settings);
+      DB.settings.onboarded = true;      // 復元したデータで再セットアップは不要
+      save(); render(); toast('復元しました');
+    }catch(err){ alert('このファイルは読み込めませんでした'); }
+  };
+  r.readAsText(f); inp.value='';
+}
+function resetAll(){
+  if(!confirm('すべての記録が消えます。取り消せません。本当に消しますか？')) return;
+  if(!confirm('最終確認：本当に全部消してよいですか？')) return;
+  DB = JSON.parse(JSON.stringify(DEFAULTS));
+  DB.settings.startD = isoToday(); DB.settings.goalD = addDays(isoToday(),90);
+  save(); go('home'); showOnboard(); toast('初期化しました');
+}
+
+/* ---------- 小物 ---------- */
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1500);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* =========================================================
+   初回セットアップ
+   ========================================================= */
+let onboardBound = false;
+function showOnboard(){
+  document.getElementById('onboard').classList.remove('hide');
+  document.getElementById('oGoalD').value = addDays(isoToday(), 90);
+  if(!onboardBound){
+    ['oHeight','oAge','oW','oGoalW','oGoalD','oSex','oAct'].forEach(id=>
+      document.getElementById(id).addEventListener('input', previewOnboard));
+    onboardBound = true;
+  }
+  previewOnboard();
+}
+function previewOnboard(){
+  const g = id => document.getElementById(id).value;
+  const h = parseFloat(g('oHeight')), a = parseInt(g('oAge'));
+  const w = parseFloat(g('oW')), gw = parseFloat(g('oGoalW')), gd = g('oGoalD');
+  const box = document.getElementById('oPreview');
+  if(!h || !a || !w || !gw || !gd || w<=gw){ box.innerHTML=''; return; }
+  const b = g('oSex')==='male' ? 10*w+6.25*h-5*a+5 : 10*w+6.25*h-5*a-161;
+  const base = Math.round(b * parseFloat(g('oAct')));
+  const days = Math.max(1, diffDays(isoToday(), gd));
+  const need = Math.min(1000, Math.round((w-gw)*7200/days));
+  const tgt  = Math.max(1300, base + 230 - need);      // 230kcal = 歩く+筋トレの想定
+  const perWeek = (w-gw)/days*7;
+  let warn = '';
+  if(perWeek > w*0.01)
+    warn = '<div class="warn" style="margin-top:8px">週 '+perWeek.toFixed(2)+'kg減のペースです。'+
+           '体重の1%（'+(w*0.01).toFixed(2)+'kg）を超えており、筋肉が落ちやすい厳しい設定です。'+
+           '期限を2〜4週間うしろにずらすと、かなり楽になります。</div>';
+  box.innerHTML = '<b style="color:var(--fg)">この設定だと</b><br>'+
+    '基礎代謝 '+Math.round(b)+' kcal ／ 生活代謝 '+base+' kcal<br>'+
+    '残り'+days+'日で '+(w-gw).toFixed(1)+'kg → 1日 '+need+' kcal の赤字が必要<br>'+
+    '<b style="color:var(--accent)">→ 1日の摂取目安 約'+tgt+' kcal</b>（歩く+筋トレをした日）'+warn;
+}
+function finishOnboard(){
+  const g = id => document.getElementById(id).value;
+  const h = parseFloat(g('oHeight')), a = parseInt(g('oAge'));
+  const w = parseFloat(g('oW')), gw = parseFloat(g('oGoalW')), gd = g('oGoalD');
+  if(!h || !a || !w || !gw || !gd){ toast('すべて入力してください'); return; }
+  if(w <= gw){ toast('目標体重は今より軽い値にしてください'); return; }
+  const s = DB.settings;
+  s.height=h; s.age=a; s.sex=g('oSex'); s.act=parseFloat(g('oAct'));
+  s.startW=w; s.goalW=gw; s.startD=isoToday(); s.goalD=gd; s.onboarded=true;
+  day(isoToday()).w = Math.round(w*10)/10;      // 今日の体重として記録
+  save();
+  document.getElementById('onboard').classList.add('hide');
+  render();
+  toast('はじめましょう');
+}
+
+/* ---------- 起動 ---------- */
+document.getElementById('wIn').addEventListener('keydown', e=>{ if(e.key==='Enter') saveWeight(); });
+window.addEventListener('resize', ()=>{ if(view==='graph') drawChart(); });
+render();
+if(!DB.settings.onboarded) showOnboard();
+</script>
+</body>
+</html>
