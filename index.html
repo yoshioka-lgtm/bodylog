@@ -93,7 +93,9 @@ main{padding:12px; max-width:640px; margin:0 auto;}
 .kv{display:flex; justify-content:space-around; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
 .kv div{text-align:center;}
 .kv span{display:block; font-size:11px; color:var(--dim);}
+.kv span i{font-style:normal; font-size:10px; color:var(--dim2); margin-left:2px;}
 .kv b{font-size:17px; font-weight:700;}
+.kv2{margin-top:10px; padding-top:10px; border-top:1px dashed #2a2f3b;}
 
 /* ===== tasks ===== */
 .task{
@@ -359,8 +361,11 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <div class="kv">
         <div><span>摂取</span><b id="kIn">0</b></div>
         <div><span>運動消費</span><b id="kBurn">0</b></div>
-        <div><span>タンパク質</span><b id="kP">0g</b></div>
         <div><span>江戸度</span><b id="kEdo">—</b></div>
+      </div>
+      <div class="kv kv2">
+        <div><span>タンパク質 <i id="kPGoal"></i></span><b id="kP">0g</b></div>
+        <div><span>脂質 <i id="kFGoal"></i></span><b id="kF">0g</b></div>
       </div>
     </div>
 
@@ -426,10 +431,11 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
 
     <div class="card">
       <h3>自分で入力</h3>
+      <input type="text" id="cfName" placeholder="食べたもの" style="margin-bottom:6px">
       <div class="row" style="gap:6px">
-        <input type="text" id="cfName" placeholder="食べたもの" style="flex:2">
-        <input type="number" id="cfKcal" inputmode="numeric" placeholder="kcal" style="flex:1">
-        <input type="number" id="cfP" inputmode="decimal" placeholder="P(g)" style="flex:1">
+        <input type="number" id="cfKcal" inputmode="numeric" placeholder="kcal">
+        <input type="number" id="cfP" inputmode="decimal" placeholder="P(g)">
+        <input type="number" id="cfF" inputmode="decimal" placeholder="F(g)">
       </div>
       <button class="btn full sm" style="margin-top:8px" onclick="addCustom()">追加して「マイ」に保存</button>
     </div>
@@ -674,67 +680,67 @@ let amt = 1;               // 量の倍率
 let cat = 'よく使う';
 
 /* =========================================================
-   食品プリセット  [名前, kcal, タンパク質g, 江戸判定]
+   食品プリセット  [名前, kcal, タンパク質g, 脂質g, 江戸判定]
    江戸判定 1 = 江戸時代にあった食材・調理法 / 0 = なかったもの
    （鶏肉は軍鶏鍋として食べられていたため1、牛豚は0。天ぷらは江戸の屋台料理なので1）
    ========================================================= */
 const FOODS = {
 '主食':[
- ['ごはん 小(100g)',156,2.5,1],['ごはん 普通(150g)',234,3.8,1],['ごはん 大盛(200g)',312,5.0,1],
- ['玄米ごはん(150g)',228,4.2,1],['おにぎり1個',180,3.0,1],['そば1人前',296,9.6,1],
- ['うどん1玉',242,6.0,1],['雑炊1杯',180,6,1],
- ['オートミール(30g)',114,4.1,0],['食パン6枚切1枚',149,5.3,0],['パスタ(乾100g)',356,12.9,0],
- ['ラーメン1杯',500,20,0],['カレーライス',700,15,0],['牛丼 並',650,20,0],['チャーハン',700,15,0]
+ ['ごはん 小(100g)',156,2.5,0.3,1],['ごはん 普通(150g)',234,3.8,0.5,1],['ごはん 大盛(200g)',312,5.0,0.6,1],
+ ['玄米ごはん(150g)',228,4.2,1.5,1],['おにぎり1個',180,3.0,0.5,1],['そば1人前',296,9.6,1.8,1],
+ ['うどん1玉',242,6.0,0.9,1],['雑炊1杯',180,6,1.5,1],
+ ['オートミール(30g)',114,4.1,1.7,0],['食パン6枚切1枚',149,5.3,2.6,0],['パスタ(乾100g)',356,12.9,1.9,0],
+ ['ラーメン1杯',500,20,15,0],['カレーライス',700,15,25,0],['牛丼 並',650,20,23,0],['チャーハン',700,15,25,0]
 ],
 '主菜':[
- ['焼き鮭 1切',106,17,1],['焼き鯖 1切',210,21,1],['鯵の開き 1枚',170,20,1],
- ['秋刀魚 1尾',290,22,1],['煮魚 1切',180,20,1],['刺身 6切',120,20,1],['鰤の照り焼き1切',250,22,1],
- ['鶏むね 塩焼き150g',158,34,1],['鶏むね 皮なし100g',105,23,1],['ささみ100g',98,23,1],
- ['サラダチキン1個',110,23,1],['鶏もも 皮なし100g',113,19,1],['鶏もも 皮つき100g',190,17,1],
- ['卵1個',76,6.2,1],['卵2個',152,12.4,1],['茶碗蒸し1個',80,7,1],['出汁巻き卵',130,10,1],
- ['納豆1パック',100,8.3,1],['豆腐 半丁(150g)',84,7.4,1],['厚揚げ1枚',150,10,1],['湯豆腐1人前',100,9,1],
- ['サバ缶 水煮1缶',340,37,1],['ツナ缶 水煮',50,11,1],['ちくわ2本',60,6,1],['しらす50g',60,12,1],
- ['豚ロース100g',248,19,0],['豚バラ100g',366,14,0],['牛赤身100g',182,21,0],
- ['プロテイン1杯',120,20,0],['ギリシャヨーグルト100g',60,10,0],['唐揚げ3個',300,18,0],
- ['ハンバーグ1個',400,20,0],['鶏の甘酢あん',320,22,0],['豚しゃぶ100g',180,18,0]
+ ['焼き鮭 1切',106,17,3.4,1],['焼き鯖 1切',210,21,13,1],['鯵の開き 1枚',170,20,8.5,1],
+ ['秋刀魚 1尾',290,22,21,1],['煮魚 1切',180,20,6,1],['刺身 6切',120,20,3.5,1],['鰤の照り焼き1切',250,22,14,1],
+ ['鶏むね 塩焼き150g',158,34,2.3,1],['鶏むね 皮なし100g',105,23,1.9,1],['ささみ100g',98,23,0.8,1],
+ ['サラダチキン1個',110,23,1.5,1],['鶏もも 皮なし100g',113,19,4.3,1],['鶏もも 皮つき100g',190,17,14,1],
+ ['卵1個',76,6.2,5.2,1],['卵2個',152,12.4,10.4,1],['茶碗蒸し1個',80,7,3.5,1],['出汁巻き卵',130,10,8.5,1],
+ ['納豆1パック',100,8.3,5.0,1],['豆腐 半丁(150g)',84,7.4,4.5,1],['厚揚げ1枚',150,10,11,1],['湯豆腐1人前',100,9,5.5,1],
+ ['サバ缶 水煮1缶',340,37,20,1],['ツナ缶 水煮',50,11,0.5,1],['ちくわ2本',60,6,0.5,1],['しらす50g',60,12,0.9,1],
+ ['豚ロース100g',248,19,19,0],['豚バラ100g',366,14,35,0],['牛赤身100g',182,21,10,0],
+ ['プロテイン1杯',120,20,1.5,0],['ギリシャヨーグルト100g',60,10,0.2,0],['唐揚げ3個',300,18,18,0],
+ ['ハンバーグ1個',400,20,26,0],['鶏の甘酢あん',320,22,16,0],['豚しゃぶ100g',180,18,11,0]
 ],
 '副菜':[
- ['もずく酢1パック',23,0.3,1],['めかぶ1パック',15,0.9,1],['冷奴',60,5,1],
- ['ほうれん草おひたし',25,2,1],['ひじき煮',80,2,1],['きんぴらごぼう',100,2,1],
- ['切り干し大根',80,2,1],['大根の煮物',60,1.5,1],['なます',40,0.7,1],['おから煮',110,5,1],
- ['枝豆100g',125,11,1],['サラダ(ドレなし)',30,1.5,1],['わかめサラダ',20,1.2,1],
- ['筑前煮',180,8,1],['納豆和え',110,9,1],['漬物 少量',15,0.5,1],
- ['サラダ(ドレあり)',100,1.5,0],['キムチ50g',25,1,0],['ブロッコリー100g',37,5.4,0],
- ['野菜炒め',180,6,0],['ポテトサラダ',170,2,0],['フライドポテトM',330,4,0],['餃子5個',250,10,0]
+ ['もずく酢1パック',23,0.3,0.1,1],['めかぶ1パック',15,0.9,0.2,1],['冷奴',60,5,3.5,1],
+ ['ほうれん草おひたし',25,2,0.3,1],['ひじき煮',80,2,4,1],['きんぴらごぼう',100,2,5,1],
+ ['切り干し大根',80,2,3,1],['大根の煮物',60,1.5,0.3,1],['なます',40,0.7,0.2,1],['おから煮',110,5,5,1],
+ ['枝豆100g',125,11,6,1],['サラダ(ドレなし)',30,1.5,0.2,1],['わかめサラダ',20,1.2,0.2,1],
+ ['筑前煮',180,8,7,1],['納豆和え',110,9,5,1],['漬物 少量',15,0.5,0.1,1],
+ ['サラダ(ドレあり)',100,1.5,8,0],['キムチ50g',25,1,0.2,0],['ブロッコリー100g',37,5.4,0.5,0],
+ ['野菜炒め',180,6,13,0],['ポテトサラダ',170,2,12,0],['フライドポテトM',330,4,16,0],['餃子5個',250,10,13,0]
 ],
 '汁物':[
- ['味噌汁1杯',40,2.5,1],['豆腐の味噌汁',60,4,1],['あさりの味噌汁',45,4,1],
- ['けんちん汁',120,5,1],['すまし汁',20,1.5,1],
- ['豚汁1杯',130,7,0],['わかめスープ',20,1,0],['コンソメスープ',25,1,0],['豆乳スープ',110,6,0]
+ ['味噌汁1杯',40,2.5,1,1],['豆腐の味噌汁',60,4,2.5,1],['あさりの味噌汁',45,4,0.8,1],
+ ['けんちん汁',120,5,6,1],['すまし汁',20,1.5,0.2,1],
+ ['豚汁1杯',130,7,7,0],['わかめスープ',20,1,0.8,0],['コンソメスープ',25,1,0.8,0],['豆乳スープ',110,6,6,0]
 ],
 '飲み物':[
- ['水・お茶',0,0,1],['麦茶',0,0,1],['豆乳200ml',92,7.2,1],
- ['日本酒1合',196,0,1],['焼酎 水割り1杯',100,0,1],
- ['ブラックコーヒー',5,0,0],['牛乳200ml',138,6.8,0],['カフェラテ',100,5,0],
- ['野菜ジュース200ml',70,1,0],['スポーツドリンク500ml',125,0,0],['コーラ500ml',225,0,0],
- ['ビール350ml',140,0,0],['ビール500ml',200,0,0],['ハイボール1杯',70,0,0],
- ['ワイン1杯',90,0,0],['レモンサワー1缶',150,0,0]
+ ['水・お茶',0,0,0,1],['麦茶',0,0,0,1],['豆乳200ml',92,7.2,4.0,1],
+ ['日本酒1合',196,0.8,0,1],['焼酎 水割り1杯',100,0,0,1],
+ ['ブラックコーヒー',5,0.2,0,0],['牛乳200ml',138,6.8,7.8,0],['カフェラテ',100,5,5,0],
+ ['野菜ジュース200ml',70,1,0.2,0],['スポーツドリンク500ml',125,0,0,0],['コーラ500ml',225,0,0,0],
+ ['ビール350ml',140,1,0,0],['ビール500ml',200,1.5,0,0],['ハイボール1杯',70,0,0,0],
+ ['ワイン1杯',90,0.2,0,0],['レモンサワー1缶',150,0,0,0]
 ],
 '間食':[
- ['どら焼き1個',220,5,1],['カステラ1切れ',150,2.5,1],['まんじゅう1個',120,2,1],
- ['羊羹1切れ',145,2,1],['みたらし団子1本',120,2,1],['せんべい2枚',90,1.5,1],
- ['スルメ30g',100,20,1],['焼き芋100g',130,1.5,1],['柿1個',60,0.4,1],['みかん1個',40,0.4,1],
- ['コンビニおでん3個',100,8,1],
- ['ナッツ25g',150,5,0],['プロテインバー',200,15,0],['ヨーグルト無糖100g',56,3.6,0],
- ['バナナ1本',86,1.1,0],['チョコ1枚(50g)',279,3,0],['ポテチ1袋(60g)',336,3,0],
- ['アイス1個',200,4,0],['菓子パン1個',350,6,0],['カップ麺1個',350,8,0],['からあげクン5個',220,15,0]
+ ['どら焼き1個',220,5,2.5,1],['カステラ1切れ',150,2.5,2.2,1],['まんじゅう1個',120,2,0.5,1],
+ ['羊羹1切れ',145,2,0.1,1],['みたらし団子1本',120,2,0.3,1],['せんべい2枚',90,1.5,0.5,1],
+ ['スルメ30g',100,20,1.0,1],['焼き芋100g',130,1.5,0.2,1],['柿1個',60,0.4,0.2,1],['みかん1個',40,0.4,0.1,1],
+ ['コンビニおでん3個',100,8,2,1],
+ ['ナッツ25g',150,5,13,0],['プロテインバー',200,15,8,0],['ヨーグルト無糖100g',56,3.6,3.0,0],
+ ['バナナ1本',86,1.1,0.2,0],['チョコ1枚(50g)',279,3,17,0],['ポテチ1袋(60g)',336,3,21,0],
+ ['アイス1個',200,4,12,0],['菓子パン1個',350,6,14,0],['カップ麺1個',350,8,14,0],['からあげクン5個',220,15,13,0]
 ],
 '外食':[
- ['寿司10貫',500,25,1],['天ぷらそば',450,15,1],['丼もの(親子丼など)',750,25,1],
- ['定食(一般)',800,30,1],['うな重',750,30,1],['蕎麦屋の天ざる',600,20,1],
- ['唐揚げ定食',950,35,0],['ハンバーガーセット',900,25,0],['ピザ2切',500,20,0],
- ['焼肉(食べ放題)',1200,60,0],['居酒屋 数品',700,30,0],['ステーキ200g',450,45,0],
- ['パスタ(外食)',700,20,0]
+ ['寿司10貫',500,25,8,1],['天ぷらそば',450,15,12,1],['丼もの(親子丼など)',750,25,15,1],
+ ['定食(一般)',800,30,25,1],['うな重',750,30,25,1],['蕎麦屋の天ざる',600,20,18,1],
+ ['唐揚げ定食',950,35,40,0],['ハンバーガーセット',900,25,40,0],['ピザ2切',500,20,22,0],
+ ['焼肉(食べ放題)',1200,60,80,0],['居酒屋 数品',700,30,35,0],['ステーキ200g',450,45,25,0],
+ ['パスタ(外食)',700,20,25,0]
 ]
 };
 
@@ -770,7 +776,7 @@ B:{ name:'Bの日 — 上半身', items:[
    食品名から江戸OKかを引く。過去に記録した分もあとから判定できる。
    ========================================================= */
 const EDO_MAP = {};
-Object.values(FOODS).flat().forEach(f => { EDO_MAP[f[0]] = f[3]; });
+Object.values(FOODS).flat().forEach(f => { EDO_MAP[f[0]] = f[4]; });
 
 /** 1=江戸OK / 0=江戸になかった / null=判定できない（自分で入力したもの） */
 function edoOf(m){
@@ -998,6 +1004,13 @@ function exBurn(k){
 }
 function intake(k){ return Math.round(day(k).meals.reduce((a,m)=>a+m.k,0)); }
 function protein(k){ return Math.round(day(k).meals.reduce((a,m)=>a+(m.p||0),0)); }
+function fat(k){ return Math.round(day(k).meals.reduce((a,m)=>a+(m.f||0),0)); }
+/* 脂質の目安。総カロリーの20〜25%を脂質から摂る。
+   下限を割るとホルモンが下がって筋肉が落ちるので、減らしすぎも問題として扱う。 */
+function fatRange(k){
+  const t = targetIntake(k);
+  return { lo: Math.round(t*0.20/9), hi: Math.round(t*0.25/9) };
+}
 /* 目標達成に必要な1日の赤字（遅れると自動で増える。上限1000kcal） */
 function needDeficit(k){
   const s = DB.settings;
@@ -1064,6 +1077,15 @@ function renderHome(){
   const pEl = document.getElementById('kP');
   animNum(pEl, protein(cur), 'g');
   pEl.style.color = protein(cur) >= pNeed ? 'var(--good)' : '';
+  document.getElementById('kPGoal').textContent = '≥'+pNeed;
+
+  // 脂質。上限超えは朱、削りすぎは金茶で注意（下限割れはホルモンが落ちるため）
+  const fr = fatRange(cur), fNow = fat(cur), fEl = document.getElementById('kF');
+  animNum(fEl, fNow, 'g');
+  document.getElementById('kFGoal').textContent = fr.lo+'〜'+fr.hi;
+  fEl.style.color = fNow > fr.hi ? 'var(--bad)'
+                  : (got > tgt*0.7 && fNow < fr.lo) ? 'var(--accent)'
+                  : (fNow >= fr.lo ? 'var(--good)' : '');
   const er = edoRate(cur), eEl = document.getElementById('kEdo');
   eEl.textContent = er.pct === null ? '—' : er.pct+'%';
   eEl.style.color = er.pct === null ? '' : (er.pct >= 80 ? 'var(--good)' : (er.pct >= 50 ? '' : 'var(--bad)'));
@@ -1307,26 +1329,30 @@ function renderMeal(){
   // 一覧
   let list;
   if(cat==='よく使う'){
-    const all = Object.values(FOODS).flat().concat(DB.myFoods.map(f=>[f.n,f.k,f.p,null]));
+    const all = Object.values(FOODS).flat().concat(DB.myFoods.map(f=>[f.n,f.k,f.p,f.f||0,null]));
     list = all.filter(f=>DB.useCount[f[0]]).sort((a,b)=>DB.useCount[b[0]]-DB.useCount[a[0]]).slice(0,12);
     if(!list.length) list = [['ごはん 普通(150g)',234,3.8,1],['卵1個',76,6.2,1],['納豆1パック',100,8.3,1],
                              ['焼き鮭 1切',106,17,1],['味噌汁1杯',40,2.5,1],['もずく酢1パック',23,0.3,1]];
   } else if(cat==='マイ'){
-    list = DB.myFoods.map(f=>[f.n,f.k,f.p,null]);
+    list = DB.myFoods.map(f=>[f.n,f.k,f.p,f.f||0,null]);
     if(!list.length) list = [];
   } else list = FOODS[cat];
 
   document.getElementById('foodGrid').innerHTML = list.length ? list.map(f=>
     '<button class="food" onclick="addFood('+JSON.stringify(JSON.stringify(f)).replace(/"/g,'&quot;')+', event)">'+
     '<span class="fn">'+esc(f[0])+'</span>'+
-    '<span class="fk">'+Math.round(f[1]*amt)+' kcal<i>P '+(f[2]*amt).toFixed(1)+'g</i>'+
-    edoBadge(f[3])+'</span></button>'
+    '<span class="fk">'+Math.round(f[1]*amt)+' kcal'+
+    '<i>P'+(f[2]*amt).toFixed(1)+' F'+(f[3]*amt).toFixed(1)+'</i>'+
+    edoBadge(f[4])+'</span></button>'
   ).join('') : '<div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">まだありません</div>';
 
   // 食べたもの
   const D = day(), er = edoRate(cur);
-  document.getElementById('mealTotal').innerHTML = intake(cur)+' kcal / P'+protein(cur)+'g'+
-    (er.pct===null ? '' : '　<span style="color:'+(er.pct>=80?'var(--good)':'var(--dim)')+'">江戸度 '+er.pct+'%</span>');
+  const fr2 = fatRange(cur), fNow2 = fat(cur);
+  document.getElementById('mealTotal').innerHTML =
+    intake(cur)+' kcal / P'+protein(cur)+'g / '+
+    '<span style="color:'+(fNow2>fr2.hi?'var(--bad)':'inherit')+'">F'+fNow2+'g</span>'+
+    (er.pct===null ? '' : '　<span style="color:'+(er.pct>=80?'var(--good)':'var(--dim)')+'">江戸 '+er.pct+'%</span>');
   document.getElementById('eatenList').innerHTML = D.meals.length ? D.meals.map((m,i)=>
     '<div class="eaten"><div class="en">'+esc(m.n)+edoBadge(edoOf(m))+'<small>'+m.t+'</small></div>'+
     '<div class="ek">'+m.k+'</div><button class="del" onclick="delMeal('+i+')">×</button></div>').join('')
@@ -1338,8 +1364,9 @@ function addFood(json, ev){
   const btn = ev && ev.currentTarget;
   if(btn){ btn.classList.add('tapped'); setTimeout(()=>btn.classList.remove('tapped'), 450); }
   const name = amt===1 ? f[0] : f[0]+' ×'+amt;
-  day().meals.push({ n:name, k:Math.round(f[1]*amt), p:Math.round(f[2]*amt*10)/10, t:mealTime,
-                     e:(f[3]===0||f[3]===1)?f[3]:undefined });
+  day().meals.push({ n:name, k:Math.round(f[1]*amt), p:Math.round(f[2]*amt*10)/10,
+                     f:Math.round(f[3]*amt*10)/10, t:mealTime,
+                     e:(f[4]===0||f[4]===1)?f[4]:undefined });
   DB.useCount[f[0]] = (DB.useCount[f[0]]||0)+1;
   save(); renderMeal(); toast('+'+Math.round(f[1]*amt)+' kcal');
 }
@@ -1348,11 +1375,12 @@ function addCustom(){
   const n = document.getElementById('cfName').value.trim();
   const k = parseInt(document.getElementById('cfKcal').value);
   const p = parseFloat(document.getElementById('cfP').value)||0;
+  const f = parseFloat(document.getElementById('cfF').value)||0;
   if(!n || !k){ toast('名前とkcalを入れてください'); return; }
-  day().meals.push({n:n, k:k, p:p, t:mealTime});
-  if(!DB.myFoods.some(f=>f.n===n)) DB.myFoods.push({n:n,k:k,p:p});
+  day().meals.push({n:n, k:k, p:p, f:f, t:mealTime});
+  if(!DB.myFoods.some(x=>x.n===n)) DB.myFoods.push({n:n,k:k,p:p,f:f});
   DB.useCount[n] = (DB.useCount[n]||0)+1;
-  document.getElementById('cfName').value=''; document.getElementById('cfKcal').value=''; document.getElementById('cfP').value='';
+  ['cfName','cfKcal','cfP','cfF'].forEach(id=>document.getElementById(id).value='');
   save(); renderMeal(); toast('追加しました');
 }
 
@@ -1610,6 +1638,7 @@ function syncPayload(){
       target: kcal ? targetIntake(k) : '',
       balance: kcal ? kcal - baseBurn(k) - exBurn(k) : '',
       protein: protein(k) || '',
+      fat: kcal ? fat(k) : '',
       edo: (function(){ const r = edoRate(k); return r.pct === null ? '' : r.pct; })(),
       steps: D.steps || '',
       sets: sets || '',
