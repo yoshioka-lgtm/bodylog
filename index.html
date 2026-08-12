@@ -475,6 +475,24 @@ nav .lb{font-size:10px; font-weight:600;}
     </div>
 
     <div class="card">
+      <h3>スプレッドシート同期</h3>
+      <div class="tiny" style="margin-bottom:12px">
+        記録をGoogleスプレッドシートにも自動で書き出します。設定すると
+        <b style="color:var(--fg)">記録が消えなくなり、毎晩21時に未入力の通知が届く</b>ようになります。<br>
+        URLと合言葉は<b style="color:var(--fg)">この端末にだけ</b>保存され、アプリのプログラムには含まれません。
+      </div>
+      <label class="f"><span>同期URL（GASのウェブアプリURL）</span>
+        <input type="text" id="syUrl" placeholder="https://script.google.com/macros/s/.../exec" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <label class="f"><span>合言葉（GASに書いたものと同じ文字列）</span>
+        <input type="text" id="syToken" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <div class="row" style="gap:8px">
+        <button class="btn pri" style="flex:1" onclick="saveSync()">保存</button>
+        <button class="btn" style="flex:1" onclick="syncNow(true)">今すぐ同期</button>
+      </div>
+      <div id="syStatus" class="tiny" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
       <h3>写真</h3>
       <div class="tiny" style="margin-bottom:12px">
         写真は<b style="color:var(--fg)">このiPhoneの中だけ</b>に保存されます。インターネットには上がりません。
@@ -552,7 +570,9 @@ const DEFAULTS = {
   useCount:{},    // 食品名 : 回数
   lastBackup:null,// 最後にファイル書き出しした日
   photos:{goal:null, before:null, now:null},  // 端末内にのみ保存（dataURL）
-  whyOffset:0     // 日替わりメッセージの手動送り
+  whyOffset:0,    // 日替わりメッセージの手動送り
+  /* スプレッドシート同期。URLと合言葉はこの端末にだけ保存し、コードには埋め込まない */
+  sync:{url:'', token:'', lastAt:null, lastErr:null}
 };
 
 let DB = load();
@@ -721,10 +741,13 @@ function load(){
     if(d.lastBackup === undefined) d.lastBackup = null;
     d.photos = Object.assign({goal:null, before:null, now:null}, d.photos||{});
     d.whyOffset = d.whyOffset||0;
+    d.sync = Object.assign({url:'', token:'', lastAt:null, lastErr:null}, d.sync||{});
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
 }
-function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function saveRaw(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+/* 保存のたびに同期を予約する。連続入力でも送信は最後の1回だけ（3秒のまとめ） */
+function save(){ saveRaw(); scheduleSync(); }
 function day(k){
   k = k||cur;
   if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false };
@@ -884,11 +907,17 @@ function renderHome(){
   else msg = '予定より '+(w-should).toFixed(1)+'kg 遅れ。1日の赤字目標を '+need+'kcal に自動調整しました';
   document.getElementById('paceMsg').innerHTML = msg;
 
-  // バックアップ督促（30日以上ほったらかしのとき）
+  // 記録が失われそうなときだけ警告する
   const bw = document.getElementById('bkWarn');
   const nDays = Object.keys(DB.days).length;
+  const syncOn = !!DB.sync.url;
+  const stale = syncOn && DB.sync.lastAt && diffDays(DB.sync.lastAt.slice(0,10), isoToday()) >= 3;
   const since = DB.lastBackup ? diffDays(DB.lastBackup, isoToday()) : null;
-  if(nDays >= 7 && (since === null || since >= 30)){
+  if(syncOn && (DB.sync.lastErr || stale)){
+    bw.innerHTML = 'スプレッドシートへの同期が'+(DB.sync.lastErr ? '失敗しています' : '3日以上できていません')+
+      '。<br><b>設定タブ →「今すぐ同期」</b>で確認してください。';
+    bw.classList.remove('hide');
+  } else if(!syncOn && nDays >= 7 && (since === null || since >= 30)){
     bw.innerHTML = (since===null ? 'まだ一度もバックアップしていません。' : 'バックアップから'+since+'日経ちました。')+
       '<br>記録が消える前に、<b>設定タブ →「記録をファイルに書き出す」</b>を押してください。';
     bw.classList.remove('hide');
@@ -1234,6 +1263,9 @@ function drawChart(){
 function renderSet(){
   const s = DB.settings;
   renderPhotoSet();
+  document.getElementById('syUrl').value   = DB.sync.url;
+  document.getElementById('syToken').value = DB.sync.token;
+  renderSyncStatus();
   document.getElementById('sHeight').value = s.height;
   document.getElementById('sAge').value    = s.age;
   document.getElementById('sSex').value    = s.sex;
@@ -1276,6 +1308,95 @@ function saveSettings(){
   s.startD = document.getElementById('sStartD').value||s.startD;
   s.goalD  = document.getElementById('sGoalD').value||s.goalD;
   save(); renderSet(); toast('保存しました');
+}
+
+/* =========================================================
+   スプレッドシート同期
+   localStorage が正本、スプレッドシートは写し。
+   送信に失敗しても記録は消えず、次の保存時にまとめて送り直される。
+   ========================================================= */
+let syncTimer = null;
+function scheduleSync(){
+  if(!DB.sync.url) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(()=>syncNow(false), 3000);
+}
+function mealsText(D){
+  if(!D.meals || !D.meals.length) return '';
+  const by = {};
+  D.meals.forEach(m => { (by[m.t] = by[m.t] || []).push(m.n); });
+  return ['朝','昼','夜','間食'].filter(t=>by[t]).map(t => t+'：'+by[t].join('、')).join(' ／ ');
+}
+function syncPayload(){
+  const days = [];
+  for(let i=0; i<14; i++){
+    const k = addDays(isoToday(), -i);
+    const D = DB.days[k];
+    if(!D) continue;
+    const sets = Object.values((D.wk&&D.wk.sets)||{}).reduce((a,b)=>a+(b||0),0);
+    const kcal = intake(k);
+    days.push({
+      date:k, wd:wd(k),
+      w: D.w || '',
+      kcal: kcal || '',
+      target: kcal ? targetIntake(k) : '',
+      balance: kcal ? kcal - baseBurn(k) - exBurn(k) : '',
+      protein: protein(k) || '',
+      steps: D.steps || '',
+      sets: sets || '',
+      type: sets ? (D.wk.type==='A' ? 'A 下半身' : 'B 上半身') : '',
+      meals: mealsText(D)
+    });
+  }
+  return days;
+}
+async function syncNow(manual){
+  const s = DB.sync;
+  if(!s.url){ if(manual) toast('先に同期URLを保存してください'); return; }
+  clearTimeout(syncTimer);
+  s.busy = true; if(view==='set') renderSyncStatus();
+  try{
+    // Content-Type を text/plain にすると事前確認(preflight)が起きず、GASでも通る
+    const res = await fetch(s.url, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ token:s.token, days:syncPayload() })
+    });
+    let ok = res.ok, err = null;
+    try{
+      const j = await res.json();
+      ok = !!j.ok;
+      if(!ok) err = (j.error === 'token') ? '合言葉が一致しません' : String(j.error);
+    }catch(_){ /* 応答が読めなくても送信自体は届いていることが多い */ }
+    if(ok){ s.lastAt = new Date().toISOString(); s.lastErr = null; }
+    else s.lastErr = err || '書き込みに失敗しました';
+  }catch(err){
+    s.lastErr = 'つながりませんでした（URLか通信状態を確認）';
+  }
+  s.busy = false; saveRaw();
+  if(view==='set') renderSyncStatus();
+  if(manual) toast(s.lastErr ? s.lastErr : 'スプレッドシートに同期しました');
+}
+function saveSync(){
+  const u = document.getElementById('syUrl').value.trim();
+  const t = document.getElementById('syToken').value.trim();
+  if(u && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(u)){
+    if(!confirm('GASのURLの形式と違うようです。このまま保存しますか？')) return;
+  }
+  DB.sync.url = u; DB.sync.token = t; DB.sync.lastErr = null;
+  saveRaw(); renderSyncStatus();
+  toast(u ? '保存しました。「今すぐ同期」で確認できます' : '同期をオフにしました');
+}
+function renderSyncStatus(){
+  const s = DB.sync, el = document.getElementById('syStatus');
+  if(!el) return;
+  if(s.busy){ el.innerHTML = '送信中…'; return; }
+  if(!s.url){ el.innerHTML = '<b style="color:var(--dim)">未設定（記録はこの端末の中だけ）</b>'; return; }
+  if(s.lastErr){ el.innerHTML = '<b style="color:var(--bad)">'+esc(s.lastErr)+'</b>'; return; }
+  if(!s.lastAt){ el.innerHTML = '設定済み。まだ一度も送信していません'; return; }
+  const d = new Date(s.lastAt);
+  el.innerHTML = '<b style="color:var(--good)">最後の同期：'+
+    (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</b>';
 }
 
 /* ---------- バックアップ ---------- */
