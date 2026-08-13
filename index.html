@@ -384,7 +384,7 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
         <div class="ck">✓</div><div class="t">体重を測る<span class="n">これだけは毎日</span></div>
       </div>
       <div class="task" id="t-walk" onclick="toggleWalk()">
-        <div class="ck">✓</div><div class="t">ウォーキング<span class="n" id="walkN">20分</span></div>
+        <div class="ck">✓</div><div class="t">歩く・走る<span class="n" id="walkN">20分</span></div>
       </div>
       <div class="task" id="t-train" onclick="go('train')">
         <div class="ck">✓</div><div class="t">筋トレ<span class="n" id="trainN">—</span></div>
@@ -457,6 +457,20 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <div class="chips" id="stepQuick" style="margin-top:10px; margin-bottom:0"></div>
       <button class="btn full sm" style="margin-top:8px" onclick="openHealth()">❤️ ヘルスケアアプリで歩数を見る</button>
       <div class="muted" id="stepSub" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h3>ランニング</h3>
+      <div class="row between">
+        <div><b style="font-size:17px" id="runMin">0</b> <span class="muted">分</span>
+          <span class="muted" id="runKcal" style="margin-left:8px"></span></div>
+        <div class="row" style="gap:6px">
+          <button class="btn sm" onclick="addRun(-5)">−5</button>
+          <button class="btn sm" onclick="addRun(5)">+5</button>
+        </div>
+      </div>
+      <div class="chips" id="runQuick" style="margin-top:10px; margin-bottom:0"></div>
+      <div class="tiny" id="runNote" style="margin-top:10px"></div>
     </div>
 
     <div class="card">
@@ -962,6 +976,7 @@ function day(k){
   if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false, rest:false };
   if(!DB.days[k].wk) DB.days[k].wk = { type:autoType(k), sets:{} };
   if(DB.days[k].steps === undefined) DB.days[k].steps = 0;
+  if(DB.days[k].run === undefined) DB.days[k].run = 0;
   return DB.days[k];
 }
 
@@ -1001,11 +1016,20 @@ function walkBurn(k){
   if(d.steps > 0) return Math.max(0, d.steps - 3000) * w * 0.0005;
   return 3.5 * w * (d.walk/60) * 1.05;
 }
+/* ランニング。7.0METs相当（時速8km前後のジョギング）で計算する。
+   歩数を記録している日は、その歩数にランニング分も含まれているため、
+   歩行との差（3.5METs分の上乗せ）だけを加算して二重計上を避ける。 */
+function runBurn(k){
+  const d = day(k), w = curWeight(k);
+  if(!d.run) return 0;
+  const mets = d.steps > 0 ? (7.0 - 3.5) : 7.0;
+  return mets * w * (d.run/60) * 1.05;
+}
 function exBurn(k){
   const d = day(k), w = curWeight(k);
   const setsDone = Object.values(d.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
   const train = 5.0 * w * ((setsDone*1.3)/60) * 1.05;    // 1セット≒1.3分（休憩込み）
-  return Math.round(walkBurn(k) + train);
+  return Math.round(walkBurn(k) + runBurn(k) + train);
 }
 function intake(k){ return Math.round(day(k).meals.reduce((a,m)=>a+m.k,0)); }
 function protein(k){ return Math.round(day(k).meals.reduce((a,m)=>a+(m.p||0),0)); }
@@ -1105,10 +1129,12 @@ function renderHome(){
   // タスク
   tk('t-weight', !!D.w);
   // 歩数が入っている日は歩数で判定（5,000歩以上で達成）
-  tk('t-walk', D.steps>0 ? D.steps>=5000 : D.walk>0);
-  document.getElementById('walkN').textContent = D.steps>0
-    ? D.steps.toLocaleString()+'歩'+(D.steps>=5000 ? '　達成' : '　あと'+(5000-D.steps).toLocaleString()+'歩')
-    : (D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分');
+  tk('t-walk', D.run>0 || (D.steps>0 ? D.steps>=5000 : D.walk>0));
+  document.getElementById('walkN').textContent =
+    D.run>0 ? 'ランニング '+D.run+'分'+(D.steps>0 ? '／'+D.steps.toLocaleString()+'歩' : '')
+    : (D.steps>0
+      ? D.steps.toLocaleString()+'歩'+(D.steps>=5000 ? '　達成' : '　あと'+(5000-D.steps).toLocaleString()+'歩')
+      : (D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分'));
   const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
   const total = WORKOUTS[D.wk.type].items.reduce((a,i)=>a+i.sets,0);
   tk('t-train', D.rest || done>=total);
@@ -1311,7 +1337,7 @@ function saveWeight(){
 function focusWeight(){ document.getElementById('wIn').focus(); }
 function toggleWalk(){
   const D = day();
-  if(D.steps>0){ go('train'); return; }   // 歩数管理中はトレタブで直接編集
+  if(D.steps>0 || D.run>0){ go('train'); return; }   // 歩数・ランニング記録中はトレタブで編集
   D.walk = D.walk>0 ? 0 : DB.settings.walkDefault;
   save(); render(); toast(D.walk>0? 'ウォーキング完了！' : '取り消しました');
 }
@@ -1404,6 +1430,15 @@ function renderTrain(){
       '<span style="font-size:11px">3,000歩ぶんは生活代謝にすでに含まれているため、超えた分だけを計上しています</span>'
     : 'iPhoneの「ヘルスケア」アプリを見て入れてください。歩数を入れると、下のウォーキング時間より<b style="color:var(--fg)">歩数を優先</b>して計算します（二重に数えないため）。';
 
+  // ランニング
+  document.getElementById('runMin').textContent = D.run;
+  document.getElementById('runKcal').textContent = D.run>0 ? '≒ '+Math.round(runBurn(cur))+' kcal' : '';
+  document.getElementById('runQuick').innerHTML = [10,20,30,40].map(v=>
+    '<button class="'+(D.run===v?'on':'')+'" onclick="setRun('+v+')">'+v+'分</button>').join('');
+  document.getElementById('runNote').innerHTML = D.steps>0
+    ? '歩数にランニング分も含まれているため、<b style="color:var(--fg)">歩行との差だけを加算</b>しています（二重に数えないため）。'
+    : '時速8kmほどのジョギング（7.0METs）で計算しています。同じ20分でも、歩くより約2倍消費します。';
+
   document.getElementById('walkMin').textContent = D.walk;
   document.getElementById('walkKcal').textContent = D.steps>0
     ? '（消費は歩数から計算中）'
@@ -1437,6 +1472,14 @@ function setDone(id, n){
 }
 function addWalk(n){
   const D = day(); D.walk = Math.max(0, D.walk + n); save(); renderTrain();
+}
+function addRun(n){
+  const D = day(); D.run = Math.max(0, D.run + n); save(); renderTrain();
+}
+/* よくある時間を1タップで。同じ値をもう一度押すと取り消し */
+function setRun(v){
+  const D = day(); D.run = (D.run === v) ? 0 : v; save(); renderTrain();
+  toast(D.run ? 'ランニング '+D.run+'分を記録' : 'ランニングを取り消しました');
 }
 function saveSteps(){
   const v = parseInt(document.getElementById('stepIn').value);
@@ -1662,7 +1705,8 @@ function syncPayload(){
       edo: (function(){ const r = edoRate(k); return r.pct === null ? '' : r.pct; })(),
       steps: D.steps || '',
       sets: sets || '',
-      type: D.rest ? '休養日' : (sets ? (D.wk.type==='A' ? 'A 下半身' : 'B 上半身') : ''),
+      type: [ D.rest ? '休養日' : (sets ? (D.wk.type==='A' ? 'A 下半身' : 'B 上半身') : ''),
+              D.run ? 'ラン'+D.run+'分' : '' ].filter(Boolean).join(' / '),
       meals: mealsText(D)
     });
   }
