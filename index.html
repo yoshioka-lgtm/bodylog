@@ -478,6 +478,11 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       </div>
       <div id="exList"></div>
       <div class="muted" style="text-align:center;margin-top:10px" id="wkProgress"></div>
+      <button class="btn ghost full sm" style="margin-top:12px" id="restBtn" onclick="toggleRest()"></button>
+      <div class="tiny" style="margin-top:8px; line-height:1.7">
+        筋肉痛のある日は休むのが正解です。回復中に鍛えても筋肉は増えません。
+        <b style="color:var(--fg)">休養日でも、歩くのはやってください</b>（血流が上がると回復が早まります）。
+      </div>
     </div>
 
     <div class="card">
@@ -954,7 +959,7 @@ function saveRaw(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
 function save(){ saveRaw(); scheduleSync(); }
 function day(k){
   k = k||cur;
-  if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false };
+  if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false, rest:false };
   if(!DB.days[k].wk) DB.days[k].wk = { type:autoType(k), sets:{} };
   if(DB.days[k].steps === undefined) DB.days[k].steps = 0;
   return DB.days[k];
@@ -1106,8 +1111,10 @@ function renderHome(){
     : (D.walk>0 ? D.walk+'分 完了' : DB.settings.walkDefault+'分');
   const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
   const total = WORKOUTS[D.wk.type].items.reduce((a,i)=>a+i.sets,0);
-  tk('t-train', done>=total);
-  document.getElementById('trainN').textContent = WORKOUTS[D.wk.type].name+'　'+done+'/'+total+'セット';
+  tk('t-train', D.rest || done>=total);
+  document.getElementById('trainN').textContent = D.rest
+    ? '休養日　回復も練習のうち'
+    : WORKOUTS[D.wk.type].name+'　'+done+'/'+total+'セット';
   tk('t-meal', D.meals.length>0);
   document.getElementById('mealN').textContent = D.meals.length? D.meals.length+'件 '+got+'kcal' : 'まだ0件';
   document.getElementById('easyBtn').textContent = D.easy? '「ゆるめ」を解除する' : '今日はゆるめでいく';
@@ -1414,9 +1421,14 @@ function renderTrain(){
 
   const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
   const total = W.items.reduce((a,i)=>a+i.sets,0);
-  document.getElementById('wkProgress').innerHTML = done>=total
-    ? '<span style="color:var(--good);font-weight:700">今日のトレーニング完了！</span>'
-    : done+' / '+total+' セット　（残り約'+Math.max(1,Math.round((total-done)*1.3))+'分）';
+  document.getElementById('wkProgress').innerHTML = D.rest
+    ? '<span style="color:var(--ai);font-weight:700">今日は休養日</span>'
+    : (done>=total
+      ? '<span style="color:var(--good);font-weight:700">今日のトレーニング完了！</span>'
+      : done+' / '+total+' セット　（残り約'+Math.max(1,Math.round((total-done)*1.3))+'分）');
+  const rb = document.getElementById('restBtn');
+  rb.textContent = D.rest ? '休養日をやめる' : '今日は休養日にする（筋肉痛・疲労）';
+  rb.classList.toggle('pri', !!D.rest);
 }
 function setDone(id, n){
   const D = day();
@@ -1445,6 +1457,14 @@ function openHealth(){
   const t = Date.now();
   location.href = 'x-apple-health://';
   setTimeout(()=>{ if(Date.now()-t < 1500) toast('ヘルスケアアプリを手動で開いてください'); }, 800);
+}
+/* 筋肉痛や疲労で休む日。未達成ではなく「休養」として記録に残す */
+function toggleRest(){
+  const D = day();
+  D.rest = !D.rest;
+  if(D.rest) D.wk.sets = {};        // 休む日はセット記録を空にする
+  save(); renderTrain();
+  toast(D.rest ? '今日は休養日。歩くのはやりましょう' : '休養日を解除しました');
 }
 function swapDay(){
   const D = day(); D.wk.type = D.wk.type==='A'?'B':'A'; D.wk.sets = {}; save(); renderTrain();
@@ -1642,7 +1662,7 @@ function syncPayload(){
       edo: (function(){ const r = edoRate(k); return r.pct === null ? '' : r.pct; })(),
       steps: D.steps || '',
       sets: sets || '',
-      type: sets ? (D.wk.type==='A' ? 'A 下半身' : 'B 上半身') : '',
+      type: D.rest ? '休養日' : (sets ? (D.wk.type==='A' ? 'A 下半身' : 'B 上半身') : ''),
       meals: mealsText(D)
     });
   }
