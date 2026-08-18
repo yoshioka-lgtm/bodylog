@@ -353,6 +353,11 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <div class="wi" id="whyNote"></div>
     </div>
 
+    <div class="card" id="adviceCard" style="padding:13px 14px">
+      <div style="font-size:10px;color:var(--ai);font-weight:700;letter-spacing:.1em;margin-bottom:7px">今日の指摘</div>
+      <div id="adviceText" style="font-size:13.5px;line-height:1.8"></div>
+    </div>
+
     <div class="card budget">
       <div class="lbl">今日あと食べられる</div>
       <div><span class="big" id="bLeft">—</span><span class="unit">kcal</span></div>
@@ -767,27 +772,27 @@ const FOODS = {
    筋トレメニュー
    ========================================================= */
 const WORKOUTS = {
-A:{ name:'Aの日 — 下半身', items:[
+A:{ name:'Aの日 — 下半身と背面', items:[
   {id:'bulg', n:'ブルガリアンスクワット', d:'左右 各10回 × 3セット', sets:3},
   {id:'hip',  n:'ヒップリフト',           d:'15回 × 3セット', sets:3},
-  {id:'calf', n:'カーフレイズ',           d:'20回 × 3セット', sets:3},
+  {id:'back', n:'バックエクステンション', d:'15回 × 3セット（背中）', sets:3},
   {id:'plank',n:'プランク',               d:'30秒 × 3セット', sets:3}
 ], tip:
  '<b>ブルガリアンスクワット</b>：椅子やベッドに片足の甲を乗せ、前足でしゃがむ。前足のかかとで床を押して立つ意識。膝がつま先より大きく前に出ないように。<br><br>'+
  '<b>ヒップリフト</b>：仰向けで膝を立て、お尻を持ち上げて2秒静止。お尻を締める感覚が出れば正解。<br><br>'+
- '<b>カーフレイズ</b>：段差につま先を乗せてかかとを上下。ふくらはぎは血流ポンプなので浮腫み対策にもなります。<br><br>'+
+ '<b>バックエクステンション</b>：うつ伏せで手を頭の後ろか胸の前に置き、上体を反らして2秒静止。反動を使わず、腰ではなく背中で起こす。<b>猫背の解消に直結する種目</b>で、ジャケットの見え方が変わります。<br><br>'+
  '<b>プランク</b>：肘とつま先で体を一直線に。腰が落ちると効きません。30秒がきつければ20秒でOK。'
 },
 B:{ name:'Bの日 — 上半身', items:[
-  {id:'push', n:'腕立て伏せ',             d:'15回 × 3セット', sets:3},
+  {id:'push', n:'腕立て伏せ',             d:'15回 × 3セット（胸）', sets:3},
+  {id:'row',  n:'タオルローイング',       d:'15回 × 3セット（背中）', sets:3},
   {id:'pike', n:'パイクプッシュアップ',   d:'8回 × 3セット（肩）', sets:3},
-  {id:'dip',  n:'椅子ディップス',         d:'10回 × 3セット（二の腕）', sets:3},
-  {id:'leg',  n:'レッグレイズ',           d:'12回 × 3セット（腹）', sets:3}
+  {id:'dip',  n:'椅子ディップス',         d:'10回 × 3セット（二の腕）', sets:3}
 ], tip:
- '<b>腕立て伏せ</b>：手は肩幅より少し広め。胸を床すれすれまで下ろす。15回×3が余裕になったら、手幅を広げるか足を高い所に乗せて負荷を上げます（回数を増やすより効率的）。<br><br>'+
+ '<b>腕立て伏せ</b>：手は肩幅より少し広め。胸を床すれすれまで下ろす。15回×3が余裕になったら、回数を増やすより<b>足を椅子に乗せて負荷を上げる</b>ほうが効率的です。<br><br>'+
+ '<b>タオルローイング</b>：床に座って脚を伸ばし、足裏にタオルを引っかけて両端を握る。<b>胸を張ったまま、肩甲骨を寄せるように引く</b>。背中に効いていれば正解。立って柱にタオルを回して引いてもよい。<b>上半身で最大の筋肉を使う種目</b>です。<br><br>'+
  '<b>パイクプッシュアップ</b>：お尻を高く上げた「く」の字で、頭を床に向けて下ろす。肩の前側に効きます。肩は服のシルエットを一番変える部位です。<br><br>'+
- '<b>椅子ディップス</b>：椅子に後ろ手をつき、肘を曲げて体を沈める。肘は外に開かず後ろへ。<br><br>'+
- '<b>レッグレイズ</b>：仰向けで足を伸ばしたまま上下。腰が浮くならお尻の下に手を入れる。腹筋は体脂肪が落ちれば見えます。'
+ '<b>椅子ディップス</b>：椅子に後ろ手をつき、肘を曲げて体を沈める。肘は外に開かず後ろへ。'
 }};
 
 /* =========================================================
@@ -1090,6 +1095,7 @@ function render(){
 function renderHome(){
   const D = day(), tgt = targetIntake(cur), got = intake(cur), burn = exBurn(cur);
   paintWhy();
+  paintAdvice();
   renderPhotos();
   const left = tgt - got;
   const el = document.getElementById('bLeft');
@@ -1179,6 +1185,68 @@ function renderHome(){
     bw.classList.remove('hide');
   } else bw.classList.add('hide');
 }
+/* =========================================================
+   今日の指摘 — その日の記録を見て、いま一番効くことを1つだけ出す
+   優先度の高い順に判定し、最初に当たったものを表示する。
+   ========================================================= */
+function adviceOfToday(){
+  const D = day(cur), tgt = targetIntake(cur), got = intake(cur);
+  const p = protein(cur), pNeed = Math.round(curWeight(cur)*1.6);
+  const f = fat(cur), fr = fatRange(cur);
+  const hour = (cur === isoToday()) ? new Date().getHours() : 23;   // 過去日は一日の終わりとして評価
+  const sets = Object.values((D.wk&&D.wk.sets)||{}).reduce((a,b)=>a+(b||0),0);
+
+  // 体重が未記録
+  if(!D.w) return ['まず体重を測ってください。','これだけは毎日。記録が途切れるのは、測らなかった日からです。'];
+
+  // 脂質オーバー
+  if(f > fr.hi)
+    return ['脂質が '+(f-fr.hi)+'g オーバーしています。',
+            '目安は '+fr.lo+'〜'+fr.hi+'g。揚げ物・洋菓子・肉の脂を1つ減らすと戻ります。魚の脂は削らなくて構いません。'];
+
+  // タンパク質が足りない（ある程度食べた後で判定）
+  if(got > tgt*0.5 && p < pNeed*0.7){
+    const need = pNeed - p;
+    return ['タンパク質があと '+need+'g 足りません。',
+            'ゆで卵2個で12g、納豆1パックで8g、サラダチキン1個で23g。'+
+            (hour>=19 ? '寝る前でも足せます。' : '次の食事で足してください。')];
+  }
+
+  // 食べなさすぎ（夜になっても大幅に足りない）
+  if(hour >= 19 && got < tgt*0.65)
+    return ['今日は食べなさすぎです。あと '+(tgt-got)+'kcal 食べて構いません。',
+            '削りすぎると体が省エネに切り替わり、落ちるのは脂肪ではなく筋肉になります。'];
+
+  // 運動が何もない
+  if(hour >= 17 && !D.rest && sets === 0 && !D.run && !D.walk && !D.steps)
+    return ['今日はまだ体を動かしていません。',
+            '20分歩くだけでも構いません。きつい日は「休養日」にすれば記録は途切れません。'];
+
+  // 江戸度が低い
+  const er = edoRate(cur);
+  if(er.pct !== null && er.pct < 60 && got > tgt*0.5)
+    return ['江戸度が '+er.pct+'% まで下がっています。',
+            (er.ng.length ? '今日の江戸外：'+er.ng.slice(0,3).map(m=>m.n).join('、') : '')+
+            '　和食に寄せると、脂質は自然に落ちます。'];
+
+  // タンパク質は足りたが、脂質が下限割れ
+  if(got > tgt*0.7 && f < fr.lo)
+    return ['脂質を削りすぎています（'+f+'g／下限'+fr.lo+'g）。',
+            '脂質が不足するとホルモンが下がり、筋肉が落ちやすくなります。卵や魚で足してください。'];
+
+  // ここまで問題なし
+  if(p >= pNeed*0.9 && f >= fr.lo && f <= fr.hi && got > tgt*0.6)
+    return ['今日は文句なしの内容です。','タンパク質'+p+'g、脂質'+f+'g、どちらも狙いどおり。この日を増やせば体は変わります。'];
+
+  if(hour < 12 && got < tgt*0.3) return ['今日はここからです。','朝にタンパク質を20g入れておくと、一日の合計が楽になります（卵2個＋納豆で20g）。'];
+  return ['今のところ順調です。','このまま夜の食事でタンパク質を40g前後とれば、今日の目標は達成できます。'];
+}
+function paintAdvice(){
+  const a = adviceOfToday();
+  document.getElementById('adviceText').innerHTML =
+    '<b style="color:var(--fg)">'+esc(a[0])+'</b><br><span style="color:var(--dim)">'+a[1]+'</span>';
+}
+
 /* ---------- 今日の一言（日替わり） ---------- */
 function whyOfDay(){
   const n = Math.floor(new Date(cur+'T12:00').getTime()/86400000) + DB.whyOffset;
