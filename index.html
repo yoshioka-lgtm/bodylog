@@ -197,6 +197,68 @@ label.f span{display:block; font-size:12px; color:var(--dim); margin-bottom:4px;
 .sets button:active{transform:scale(.94);}
 .tip{font-size:11.5px; color:var(--dim); background:var(--card2); border-radius:10px; padding:10px; line-height:1.6;}
 
+/* ===== 種目の詳細シート（下から出る） ===== */
+.ex .exn{display:flex; align-items:center; gap:6px;}
+.ex .exn .q{
+  width:17px; height:17px; border-radius:50%; flex:none;
+  background:var(--ai); color:var(--bg); font-size:11px; font-weight:800;
+  display:inline-flex; align-items:center; justify-content:center; line-height:1;
+}
+.ex .exhead{flex:1; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+.ex .exhead:active{opacity:.6;}
+.lvbar{display:flex; gap:6px; margin-bottom:12px;}
+.lvbar button{
+  flex:1; padding:9px 4px; border-radius:10px; background:var(--card2);
+  border:1.5px solid var(--line); color:var(--dim2); font-size:11.5px; font-weight:700;
+  transition:background .2s var(--ease), border-color .2s, color .2s;
+}
+.lvbar button.on{background:var(--accent); border-color:var(--accent); color:var(--bg);}
+.lvbar button b{display:block; font-size:13px;}
+
+.scrim{
+  position:fixed; inset:0; background:rgba(0,0,0,.62); z-index:60;
+  opacity:0; pointer-events:none; transition:opacity .26s var(--ease);
+  -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+}
+.scrim.on{opacity:1; pointer-events:auto;}
+.sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:61;
+  max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  background:var(--card); border-radius:20px 20px 0 0;
+  border-top:1px solid var(--line);
+  padding:8px 16px calc(24px + env(safe-area-inset-bottom));
+  transform:translateY(102%); transition:transform .3s var(--ease);
+}
+.sheet.on{transform:translateY(0);}
+.sheet .grab{width:38px; height:4px; border-radius:2px; background:var(--line); margin:6px auto 14px;}
+.sheet h4{margin:0 0 4px; font-size:17px; letter-spacing:.01em;}
+.sheet .sd{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:14px;}
+.sec{margin-top:16px;}
+.sec .st{
+  font-size:10px; letter-spacing:.11em; font-weight:800; color:var(--ai);
+  margin-bottom:6px;
+}
+.sec .sb{font-size:13px; line-height:1.85; color:var(--dim);}
+.sec .sb b{color:var(--fg);}
+.sec.ngs .st{color:var(--bad);}
+.mchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+.mchip{
+  font-size:11px; font-weight:700; padding:5px 9px; border-radius:20px;
+  background:var(--card2); color:var(--dim2); border:1px solid var(--line);
+}
+.mchip.p1{background:rgba(212,169,95,.18); color:var(--accent); border-color:rgba(212,169,95,.45);}
+
+/* ===== 人体図 ===== */
+.bodywrap{background:var(--card2); border-radius:14px; padding:10px 6px 4px;}
+.bodywrap svg{display:block; width:100%; height:auto; max-height:290px; margin:0 auto;}
+.blabel{display:flex; justify-content:space-around; font-size:10px; color:var(--dim2); font-weight:700; letter-spacing:.08em; padding:2px 0 6px;}
+.sil{fill:var(--card); stroke:var(--line); stroke-width:1;}
+.mus{fill:var(--line); transition:fill .35s var(--ease), opacity .35s var(--ease); opacity:.55;}
+.mus.p2{fill:var(--accent); opacity:.34;}
+.mus.p1{fill:var(--accent); opacity:1; animation:musPulse 1.9s var(--ease) infinite;}
+@keyframes musPulse{0%,100%{opacity:1}50%{opacity:.52}}
+@media (prefers-reduced-motion:reduce){ .mus.p1{animation:none} }
+
 /* ===== chart ===== */
 canvas{width:100%; display:block;}
 .legend{display:flex; gap:14px; font-size:11px; color:var(--dim); margin-top:8px; flex-wrap:wrap;}
@@ -495,12 +557,18 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
         <h3 style="margin:0" id="wkTitle">—</h3>
         <button class="btn sm ghost" onclick="swapDay()">A/B切替</button>
       </div>
+      <div class="lvbar" id="lvBar"></div>
+      <div class="tiny" style="margin:-4px 0 12px; line-height:1.65">
+        種目名をタップすると<b style="color:var(--fg)">どこに効くか（人体図）とやり方</b>が開きます。
+      </div>
       <div id="exList"></div>
       <div class="muted" style="text-align:center;margin-top:10px" id="wkProgress"></div>
       <button class="btn ghost full sm" style="margin-top:12px" id="restBtn" onclick="toggleRest()"></button>
       <div class="tiny" style="margin-top:8px; line-height:1.7">
-        筋肉痛のある日は休むのが正解です。回復中に鍛えても筋肉は増えません。
-        <b style="color:var(--fg)">休養日でも、歩くのはやってください</b>（血流が上がると回復が早まります）。
+        <b style="color:var(--fg)">筋肉痛が来ない＝効いていない、ではありません。</b>
+        同じ種目を続けると2回目以降は痛みが出にくくなります（リピーテッド・バウト効果）。
+        効いているかの本当の判断材料は<b style="color:var(--fg)">「先週より1回でも多くできたか」</b>です。<br>
+        筋肉痛が強い日は休むのが正解。ただし<b style="color:var(--fg)">休養日でも歩いてください</b>（血流が上がると回復が早まります）。
       </div>
     </div>
 
@@ -566,6 +634,18 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
     </div>
 
     <div class="card">
+      <h3>実測補正</h3>
+      <div class="tiny" style="margin-bottom:12px; line-height:1.75">
+        計算式で出した消費カロリーには<b style="color:var(--fg)">±15%の個人差</b>があり、
+        食事の記録も実際より少なめに出やすいものです。<br>
+        この機能は、<b style="color:var(--fg)">体重が実際にどう動いたか</b>から本当の消費カロリーを逆算して、
+        目安の数字をあなた専用に作り直します。推測ではなく、あなたの体が出した答えを使います。
+      </div>
+      <div id="calibBox"></div>
+      <button class="btn full" style="margin-top:12px" id="calibBtn" onclick="toggleCalib()">—</button>
+    </div>
+
+    <div class="card">
       <h3>マイ食品</h3>
       <div class="tiny" style="margin-bottom:10px">
         「自分で入力」から登録した食品の一覧です。名前やカロリーを間違えたときは、
@@ -578,7 +658,7 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <h3>スプレッドシート同期</h3>
       <div class="tiny" style="margin-bottom:12px">
         記録をGoogleスプレッドシートにも自動で書き出します。設定すると
-        <b style="color:var(--fg)">記録が消えなくなり、毎晩21時に未入力の通知が届く</b>ようになります。<br>
+        <b style="color:var(--fg)">この端末が壊れても記録が残り</b>、パソコンからも見返せます。<br>
         URLと合言葉は<b style="color:var(--fg)">この端末にだけ</b>保存され、アプリのプログラムには含まれません。
       </div>
       <label class="f"><span>同期URL（GASのウェブアプリURL）</span>
@@ -667,6 +747,25 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
     </svg><span class="lb">設定</span></button>
 </nav>
 
+<div class="scrim" id="exScrim" onclick="closeEx()"></div>
+<div class="sheet" id="exSheet">
+  <div class="grab"></div>
+  <h4 id="exTitle">—</h4>
+  <div class="sd" id="exSets">—</div>
+  <div class="bodywrap">
+    <div id="exBody"></div>
+    <div class="blabel"><span>正面</span><span>背面</span></div>
+  </div>
+  <div class="sec">
+    <div class="st">効く筋肉</div>
+    <div class="mchips" id="exMus"></div>
+  </div>
+  <div class="sec"><div class="st">なぜやるのか</div><div class="sb" id="exWhy"></div></div>
+  <div class="sec"><div class="st">やり方</div><div class="sb" id="exForm"></div></div>
+  <div class="sec ngs"><div class="st">よくある間違い</div><div class="sb" id="exNg"></div></div>
+  <button class="btn full" style="margin-top:20px" onclick="closeEx()">閉じる</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -684,6 +783,8 @@ const DEFAULTS = {
     startW:70, goalW:65,
     startD:isoToday(), goalD:addDays(isoToday(),90),
     walkDefault:20,
+    lv:2,                    // トレーニング強度 1=基本 2=テンポ 3=応用
+    calibOn:false,           // 実測補正（体重の実測から消費を逆算して使う）
     onboarded:false          // 初回セットアップ済みか
   },
   days:{},        // 'YYYY-MM-DD' : { w, meals[], walk, steps, wk:{type,sets{}}, easy }
@@ -771,29 +872,219 @@ const FOODS = {
 /* =========================================================
    筋トレメニュー
    ========================================================= */
+/* 筋肉のID。人体図のパーツIDと対応している。
+   p=主に効く筋肉（メインターゲット）、s=補助で使う筋肉。 */
+const MUSCLES = {
+  delt:'三角筋（肩）',      chest:'大胸筋（胸）',    biceps:'上腕二頭筋（力こぶ）',
+  abs:'腹直筋（お腹の正面）', oblique:'腹斜筋（脇腹）', quad:'大腿四頭筋（もも前）',
+  traps:'僧帽筋（首まわり）', lat:'広背筋（背中の広がり）', triceps:'上腕三頭筋（二の腕の裏）',
+  erector:'脊柱起立筋（背骨に沿う筋）', glute:'大殿筋（お尻）', ham:'ハムストリング（もも裏）',
+  calf:'下腿三頭筋（ふくらはぎ）', core:'腹横筋（体の内側のコルセット）'
+};
+
+/* 種目の詳細。
+   d は強度レベル1〜3の指示。自重トレは重りを足せないので、
+   回数を増やすより「同じ回数を難しくする」ほうが確実に伸びる。 */
 const WORKOUTS = {
-A:{ name:'Aの日 — 下半身と背面', items:[
-  {id:'bulg', n:'ブルガリアンスクワット', d:'左右 各10回 × 3セット', sets:3},
-  {id:'hip',  n:'ヒップリフト',           d:'15回 × 3セット', sets:3},
-  {id:'back', n:'バックエクステンション', d:'15回 × 3セット（背中）', sets:3},
-  {id:'plank',n:'プランク',               d:'30秒 × 3セット', sets:3}
+A:{ name:'Aの日 — 下半身とお腹', items:[
+  {id:'bulg', n:'ブルガリアンスクワット', sets:3,
+   d:['左右 各10回 × 3セット',
+      '左右 各10回 × 3セット（3秒かけて下ろす）',
+      '左右 各8回 × 3セット（3秒で下ろし、一番下で1秒止める）'],
+   p:['quad','glute'], s:['ham','core'],
+   why:'体で最も大きい筋肉群を一度に使う種目。<b>1種目あたりの消費カロリーが自重トレで最大</b>で、基礎代謝の底上げにも直結します。片脚ずつやるためバランス能力も上がります。',
+   form:'椅子やベッドに後ろ足の甲を乗せ、前足だけでしゃがみます。<b>前足のかかとで床を押して立つ</b>意識。上体はやや前傾でよく、まっすぐ立てると膝に負担が出ます。',
+   ng:'膝がつま先より大きく前に出る／後ろ足に体重が乗っている／勢いで反動をつける'},
+  {id:'hip',  n:'片脚ヒップリフト', sets:3,
+   d:['両脚で15回 × 3セット（上で2秒止める）',
+      '左右 各10回 × 3セット（片脚を伸ばして行う）',
+      '左右 各12回 × 3セット（上で2秒静止＋3秒で下ろす）'],
+   p:['glute','ham'], s:['erector','core'],
+   why:'お尻は座り仕事で最も衰える筋肉です。<b>ここが落ちると骨盤が後ろに倒れ、腰痛と下腹の出っ張りの原因</b>になります。腰が悪い人ほど優先度が高い種目。',
+   form:'仰向けで膝を立て、かかとで床を押してお尻を持ち上げます。<b>お尻を締めきった位置で2秒静止</b>。腰で反らさず、お尻で持ち上げること。',
+   ng:'腰を反らせて高く上げようとする（腰痛の原因）／太もも裏がつる場合はかかとを体に近づける'},
+  {id:'plank',n:'プランク', sets:3,
+   d:['30秒 × 3セット','45秒 × 3セット','60秒 × 3セット（または片手を上げて30秒）'],
+   p:['core','abs'], s:['delt','glute'],
+   why:'腹横筋（内側のコルセット）を鍛える種目。<b>ここが働くとウエストが物理的に締まり、腰も守られます</b>。腹筋運動と違い背骨を曲げないので、腰に最も安全です。',
+   form:'肘とつま先で体を一直線に。<b>お尻を軽く締め、みぞおちを天井に引き上げる</b>意識。呼吸は止めない。',
+   ng:'腰が落ちる（効かないうえに腰を痛める）／お尻が高く上がる／息を止める'},
+  {id:'deadbug',n:'デッドバグ', sets:3,
+   d:['左右 各10回 × 3セット','左右 各12回 × 3セット（3秒かけて伸ばす）','左右 各12回 × 3セット（手足を床すれすれで1秒止める）'],
+   p:['abs','core'], s:['oblique'],
+   why:'<b>腰痛持ちのために作られた腹筋種目</b>です。背骨を丸めずに腹筋を最大限使えるため、腰に負担がかかりません。上体起こしより腹直筋への刺激が強いという研究もあります。',
+   form:'仰向けで両膝を90度に上げ、両手を天井へ。<b>腰を床に押しつけたまま</b>、対角の手と脚をゆっくり伸ばして戻します。',
+   ng:'腰と床の間に隙間ができる（そこで止める）／速く動かす／息を止める'},
+  {id:'side', n:'サイドプランク', sets:3,
+   d:['左右 各20秒 × 3セット','左右 各30秒 × 3セット','左右 各30秒 × 3セット（上の脚を持ち上げる）'],
+   p:['oblique','core'], s:['delt','glute'],
+   why:'脇腹（腹斜筋）に効く数少ない安全な種目。<b>脇腹が締まると、正面から見たときのウエストのラインが最も変わります</b>。ジャケットの腰まわりに直結する部位です。',
+   form:'横向きで肘を肩の真下に置き、体を一直線に持ち上げます。きつければ<b>膝をついて構いません</b>。',
+   ng:'体が前後にねじれる／腰が落ちる／肘が肩の真下からずれる'}
 ], tip:
- '<b>ブルガリアンスクワット</b>：椅子やベッドに片足の甲を乗せ、前足でしゃがむ。前足のかかとで床を押して立つ意識。膝がつま先より大きく前に出ないように。<br><br>'+
- '<b>ヒップリフト</b>：仰向けで膝を立て、お尻を持ち上げて2秒静止。お尻を締める感覚が出れば正解。<br><br>'+
- '<b>バックエクステンション</b>：うつ伏せで手を頭の後ろか胸の前に置き、上体を反らして2秒静止。反動を使わず、腰ではなく背中で起こす。<b>猫背の解消に直結する種目</b>で、ジャケットの見え方が変わります。<br><br>'+
- '<b>プランク</b>：肘とつま先で体を一直線に。腰が落ちると効きません。30秒がきつければ20秒でOK。'
+ '<b>この日の狙い</b>：体で最大の筋肉（脚・お尻）と、ウエストを内側から締める体幹。'+
+ '脚とお尻は<b>基礎代謝の約4割</b>を占めるため、ここを鍛えると「何もしていない時間の消費」が増えます。<br><br>'+
+ '<b>腰への配慮</b>：上体起こし・レッグレイズ・バックエクステンションは背骨を曲げ伸ばしするため、'+
+ '腰に持病がある場合は避けるべき種目です。ここでは<b>背骨を動かさずに腹筋を使う</b>デッドバグ・プランク・サイドプランクで構成しています。<br><br>'+
+ '<b>順番</b>：1→5の順にやってください。大きい筋肉から先に使うのが原則です。'
 },
-B:{ name:'Bの日 — 上半身', items:[
-  {id:'push', n:'腕立て伏せ',             d:'15回 × 3セット（胸）', sets:3},
-  {id:'row',  n:'タオルローイング',       d:'15回 × 3セット（背中）', sets:3},
-  {id:'pike', n:'パイクプッシュアップ',   d:'8回 × 3セット（肩）', sets:3},
-  {id:'dip',  n:'椅子ディップス',         d:'10回 × 3セット（二の腕）', sets:3}
+B:{ name:'Bの日 — 上半身とお腹', items:[
+  {id:'push', n:'足上げ腕立て伏せ', sets:3,
+   d:['腕立て伏せ 15回 × 3セット（床）',
+      '足を椅子に乗せて 12回 × 3セット',
+      '足を椅子に乗せて 10回 × 3セット（4秒かけて下ろす）'],
+   p:['chest','delt','triceps'], s:['core'],
+   why:'<b>足を高くすると、負荷が胸の上部と肩の前側に移ります</b>。ここが厚くなると鎖骨の下にラインが出て、シャツを着たときの印象が最も変わる部位です。パイクプッシュアップの代わりに肩を鍛えられ、腰を曲げないため腰への負担がありません。',
+   form:'手は肩幅より少し広め。<b>胸を床すれすれまで下ろす</b>。体は一直線を保ち、お尻が落ちないように。足を乗せる高さが高いほどきつくなります。',
+   ng:'可動域が浅い（一番もったいない）／腰が反る／肘を真横に開く（肩を痛めます。45度後ろへ）'},
+  {id:'row',  n:'タオルローイング', sets:3,
+   d:['15回 × 3セット','15回 × 3セット（引いた位置で2秒静止）','12回 × 3セット（2秒静止＋3秒かけて戻す）'],
+   p:['lat','traps'], s:['biceps','erector'],
+   why:'<b>上半身で最大の筋肉である広背筋を使う唯一の種目</b>。背中が広がると相対的にウエストが細く見えます（Vシェイプ）。テーラードジャケットが似合うかどうかは、腹筋より背中と肩で決まります。',
+   form:'床に座って脚を伸ばし、足裏にタオルを引っかけて両端を握ります。<b>胸を張ったまま、肩甲骨を背骨に寄せるように引く</b>。腕で引くのではなく、肘を後ろに送る意識。',
+   ng:'背中が丸まる／腕だけで引く／肩がすくむ（首に力が入ったら失敗）'},
+  {id:'dip',  n:'椅子ディップス', sets:3,
+   d:['10回 × 3セット（膝を曲げて）','12回 × 3セット（脚を伸ばして）','12回 × 3セット（3秒かけて沈む）'],
+   p:['triceps','delt'], s:['chest'],
+   why:'二の腕の裏（上腕三頭筋）は<b>腕の筋肉の3分の2を占めます</b>。ここが締まると腕まわりの印象が変わり、シャツの袖の見え方も変わります。',
+   form:'椅子に後ろ手をついて、肘を曲げて体を沈めます。<b>肘は外に開かず、まっすぐ後ろへ</b>。肩がすくまないよう胸を張る。',
+   ng:'肘が外に開く（肩を痛めます）／お尻が椅子から離れすぎる／可動域が浅い'},
+  {id:'bird', n:'バードドッグ', sets:3,
+   d:['左右 各10回 × 3セット','左右 各10回 × 3セット（伸ばした位置で3秒静止）','左右 各10回 × 3セット（3秒静止＋肘と膝を体の下で合わせる）'],
+   p:['erector','glute'], s:['core','delt'],
+   why:'背骨に沿う脊柱起立筋を、<b>腰を反らさずに</b>鍛えられる種目。バックエクステンションと同じ部位を狙えて、腰への負担は比較になりません。<b>猫背の解消に最も効きます</b>。姿勢が変わるだけで見た目の印象は数kg分変わります。',
+   form:'四つ這いになり、対角の手と脚を床と平行になるまで伸ばして静止。<b>背中の上にコップを乗せても倒れない</b>くらい体幹を固定します。',
+   ng:'脚を高く上げすぎて腰が反る／体が左右に傾く／速く動かす'},
+  {id:'curl', n:'カールアップ', sets:3,
+   d:['15回 × 3セット','15回 × 3セット（上で2秒止める）','20回 × 3セット（上で2秒止める）'],
+   p:['abs'], s:['oblique','core'],
+   why:'腹直筋（いわゆるシックスパック）に直接効く種目。<b>腰の下に手を入れて背骨のカーブを保つ</b>ことで、通常の上体起こしより腰への負担を大幅に減らしています。腰痛研究の第一人者マクギル博士が推奨する形です。',
+   form:'仰向けで片膝を立て、もう片脚は伸ばす。<b>両手を腰の下に入れて</b>、頭と肩甲骨が床から少し浮くところまで起こします。起こすのは10cm程度で十分。',
+   ng:'首を手で引っぱる／体を大きく起こす（腰に負担が移ります）／反動を使う'}
 ], tip:
- '<b>腕立て伏せ</b>：手は肩幅より少し広め。胸を床すれすれまで下ろす。15回×3が余裕になったら、回数を増やすより<b>足を椅子に乗せて負荷を上げる</b>ほうが効率的です。<br><br>'+
- '<b>タオルローイング</b>：床に座って脚を伸ばし、足裏にタオルを引っかけて両端を握る。<b>胸を張ったまま、肩甲骨を寄せるように引く</b>。背中に効いていれば正解。立って柱にタオルを回して引いてもよい。<b>上半身で最大の筋肉を使う種目</b>です。<br><br>'+
- '<b>パイクプッシュアップ</b>：お尻を高く上げた「く」の字で、頭を床に向けて下ろす。肩の前側に効きます。肩は服のシルエットを一番変える部位です。<br><br>'+
- '<b>椅子ディップス</b>：椅子に後ろ手をつき、肘を曲げて体を沈める。肘は外に開かず後ろへ。'
+ '<b>この日の狙い</b>：胸・肩・背中・二の腕と、腹直筋。'+
+ '目指す体型（肩幅があり、ウエストが締まって見える形）は<b>肩と背中の厚みで決まります</b>。腹筋を割るのは体脂肪の仕事で、シルエットを作るのは肩と背中の仕事です。<br><br>'+
+ '<b>パイクプッシュアップを外しました</b>：腰を高く曲げる姿勢が腰に負担をかけるためです。'+
+ '肩の前側は「足上げ腕立て」と「椅子ディップス」で代替できています。<br><br>'+
+ '<b>順番</b>：1→5の順に。押す種目（腕立て・ディップス）の間に引く種目（ローイング）を挟むと、休憩が短くて済みます。'
 }};
+
+/* 種目IDから種目データを引く（A/B両方を横断して探す） */
+function findEx(id){
+  for(const t of ['A','B']){
+    const it = WORKOUTS[t].items.find(x=>x.id===id);
+    if(it) return it;
+  }
+  return null;
+}
+/* 現在の強度レベルに応じた指示文 */
+function exDesc(it){
+  const lv = Math.min(3, Math.max(1, DB.settings.lv||2));
+  return it.d[lv-1] || it.d[0];
+}
+
+/* =========================================================
+   人体図
+   正面（左）と背面（右）を並べて描き、種目で使う筋肉を光らせる。
+   data-m の値が MUSCLES のキーと対応している。
+   ========================================================= */
+const BODY_SVG = `<svg viewBox="0 0 260 292" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+ <g>
+  <ellipse class="sil" cx="68" cy="27" rx="13.5" ry="16.5"/>
+  <rect class="sil" x="62" y="40" width="12" height="12" rx="3"/>
+  <path class="sil" d="M47,55 C47,49 89,49 89,55 L87,88 L83,124 C83,131 53,131 53,124 L49,88 Z"/>
+  <path class="sil" d="M52,122 L84,122 L86,150 C86,159 50,159 50,150 Z"/>
+  <rect class="sil" x="32" y="57" width="13" height="50" rx="6.5" transform="rotate(-5 38.5 82)"/>
+  <rect class="sil" x="91" y="57" width="13" height="50" rx="6.5" transform="rotate(5 97.5 82)"/>
+  <rect class="sil" x="27" y="102" width="11" height="46" rx="5.5" transform="rotate(-4 32.5 125)"/>
+  <rect class="sil" x="98" y="102" width="11" height="46" rx="5.5" transform="rotate(4 103.5 125)"/>
+  <rect class="sil" x="48" y="150" width="18" height="66" rx="9"/>
+  <rect class="sil" x="70" y="150" width="18" height="66" rx="9"/>
+  <rect class="sil" x="50" y="214" width="14" height="64" rx="7"/>
+  <rect class="sil" x="72" y="214" width="14" height="64" rx="7"/>
+  <path class="mus" data-m="traps" d="M56,50 L80,50 L87,59 L75,55 L61,55 L49,59 Z"/>
+  <ellipse class="mus" data-m="delt" cx="41" cy="64" rx="10" ry="11.5"/>
+  <ellipse class="mus" data-m="delt" cx="95" cy="64" rx="10" ry="11.5"/>
+  <path class="mus" data-m="chest" d="M51.5,59 C58,55 66,56 66.5,59 L66.5,80 C59,82 52.5,77 51.5,70 Z"/>
+  <path class="mus" data-m="chest" d="M84.5,59 C78,55 70,56 69.5,59 L69.5,80 C77,82 83.5,77 84.5,70 Z"/>
+  <ellipse class="mus" data-m="biceps" cx="38" cy="86" rx="6" ry="16"/>
+  <ellipse class="mus" data-m="biceps" cx="98" cy="86" rx="6" ry="16"/>
+  <path class="mus" data-m="oblique" d="M52,85 C50,98 51,114 55,123 L57.5,123 L57.5,85 Z"/>
+  <path class="mus" data-m="oblique" d="M84,85 C86,98 85,114 81,123 L78.5,123 L78.5,85 Z"/>
+  <rect class="mus" data-m="abs" x="59" y="84" width="18" height="36" rx="4"/>
+  <rect class="mus" data-m="core" x="50" y="104" width="36" height="15" rx="7.5"/>
+  <ellipse class="mus" data-m="quad" cx="57" cy="182" rx="8" ry="28"/>
+  <ellipse class="mus" data-m="quad" cx="79" cy="182" rx="8" ry="28"/>
+ </g>
+ <g>
+  <ellipse class="sil" cx="192" cy="27" rx="13.5" ry="16.5"/>
+  <rect class="sil" x="186" y="40" width="12" height="12" rx="3"/>
+  <path class="sil" d="M171,55 C171,49 213,49 213,55 L211,88 L207,124 C207,131 177,131 177,124 L173,88 Z"/>
+  <path class="sil" d="M176,122 L208,122 L210,150 C210,159 174,159 174,150 Z"/>
+  <rect class="sil" x="156" y="57" width="13" height="50" rx="6.5" transform="rotate(-5 162.5 82)"/>
+  <rect class="sil" x="215" y="57" width="13" height="50" rx="6.5" transform="rotate(5 221.5 82)"/>
+  <rect class="sil" x="151" y="102" width="11" height="46" rx="5.5" transform="rotate(-4 156.5 125)"/>
+  <rect class="sil" x="222" y="102" width="11" height="46" rx="5.5" transform="rotate(4 227.5 125)"/>
+  <rect class="sil" x="172" y="150" width="18" height="66" rx="9"/>
+  <rect class="sil" x="194" y="150" width="18" height="66" rx="9"/>
+  <rect class="sil" x="174" y="214" width="14" height="64" rx="7"/>
+  <rect class="sil" x="196" y="214" width="14" height="64" rx="7"/>
+  <path class="mus" data-m="traps" d="M180,52 L204,52 L207,61 L196,86 L192,90 L188,86 L177,61 Z"/>
+  <ellipse class="mus" data-m="delt" cx="165" cy="64" rx="10" ry="11.5"/>
+  <ellipse class="mus" data-m="delt" cx="219" cy="64" rx="10" ry="11.5"/>
+  <path class="mus" data-m="lat" d="M175,72 C170,86 172,105 178,120 L190,112 L190,76 Z"/>
+  <path class="mus" data-m="lat" d="M209,72 C214,86 212,105 206,120 L194,112 L194,76 Z"/>
+  <rect class="mus" data-m="erector" x="188" y="82" width="8" height="42" rx="4"/>
+  <ellipse class="mus" data-m="triceps" cx="162" cy="86" rx="6" ry="16"/>
+  <ellipse class="mus" data-m="triceps" cx="222" cy="86" rx="6" ry="16"/>
+  <ellipse class="mus" data-m="glute" cx="184" cy="140" rx="10" ry="14"/>
+  <ellipse class="mus" data-m="glute" cx="200" cy="140" rx="10" ry="14"/>
+  <ellipse class="mus" data-m="ham" cx="181" cy="182" rx="8" ry="28"/>
+  <ellipse class="mus" data-m="ham" cx="203" cy="182" rx="8" ry="28"/>
+  <ellipse class="mus" data-m="calf" cx="181" cy="238" rx="6.5" ry="22"/>
+  <ellipse class="mus" data-m="calf" cx="203" cy="238" rx="6.5" ry="22"/>
+ </g>
+</svg>`;
+
+function paintBody(el, prim, sec){
+  el.innerHTML = BODY_SVG;
+  el.querySelectorAll('.mus').forEach(m=>{
+    const k = m.getAttribute('data-m');
+    if(prim.indexOf(k) >= 0)      m.classList.add('p1');
+    else if(sec.indexOf(k) >= 0)  m.classList.add('p2');
+  });
+}
+
+/* ---------- 種目の詳細シート ---------- */
+let exOpen = null;
+function openEx(id){
+  const it = findEx(id); if(!it) return;
+  exOpen = id;
+  document.getElementById('exTitle').textContent = it.n;
+  document.getElementById('exSets').textContent  = exDesc(it);
+  paintBody(document.getElementById('exBody'), it.p, it.s);
+  document.getElementById('exMus').innerHTML =
+    it.p.map(m=>'<span class="mchip p1">'+MUSCLES[m]+'</span>').join('') +
+    it.s.map(m=>'<span class="mchip">'+MUSCLES[m]+'</span>').join('');
+  document.getElementById('exWhy').innerHTML  = it.why;
+  document.getElementById('exForm').innerHTML = it.form;
+  document.getElementById('exNg').innerHTML   = it.ng;
+  document.getElementById('exScrim').classList.add('on');
+  document.getElementById('exSheet').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeEx(){
+  document.getElementById('exScrim').classList.remove('on');
+  document.getElementById('exSheet').classList.remove('on');
+  document.body.style.overflow = '';
+  exOpen = null;
+}
+/* 強度レベルの切替。回数を増やすより、同じ回数を難しくするほうが自重では伸びる。 */
+function setLv(n){
+  DB.settings.lv = n; save(); renderTrain();
+  if(exOpen){ const it = findEx(exOpen); if(it) document.getElementById('exSets').textContent = exDesc(it); }
+  toast('強度を Lv'+n+' にしました');
+}
 
 /* =========================================================
    江戸判定
@@ -975,7 +1266,7 @@ function load(){
 }
 function saveRaw(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
 /* 保存のたびに同期を予約する。連続入力でも送信は最後の1回だけ（3秒のまとめ） */
-function save(){ saveRaw(); scheduleSync(); }
+function save(){ _calibCache = null; saveRaw(); scheduleSync(); }
 function day(k){
   k = k||cur;
   if(!DB.days[k]) DB.days[k] = { w:null, meals:[], walk:0, steps:0, wk:{type:autoType(k), sets:{}}, easy:false, rest:false };
@@ -1013,7 +1304,58 @@ function bmr(w){
     ? 10*w + 6.25*s.height - 5*s.age + 5
     : 10*w + 6.25*s.height - 5*s.age - 161;
 }
-function baseBurn(k){ return Math.round(bmr(curWeight(k)) * DB.settings.act); }
+function baseBurnRaw(k){ return Math.round(bmr(curWeight(k)) * DB.settings.act); }
+/* 実測補正が入っているときは、計算式ではなく「体重が実際にどう動いたか」を優先する */
+function baseBurn(k){ return Math.round(baseBurnRaw(k) * calibFactor()); }
+
+/* =========================================================
+   実測補正（アダプティブTDEE）
+   ミフリン式＋活動係数は個人差が±15%あり、食事の記録も実際より
+   少なめに出やすい。この2つのズレを、体重の実測値からまとめて逆算する。
+   「記録が甘い」のか「消費が少ない」のかは区別できないが、
+   どちらであっても対処は同じ（目安を下げる）なので実用上は問題ない。
+   ========================================================= */
+let _calibCache = null;
+function calib(){
+  const all = Object.keys(DB.days).filter(k => k <= isoToday()).sort();
+  const win = all.slice(-28).filter(k => day(k).w > 0 && intake(k) > 0);
+  const n = win.length;
+  if(n < 10) return {ok:false, n:n, need:10};
+
+  // 体重の傾きを最小二乗法で求める（単日の増減に振り回されないため）
+  const t0 = new Date(win[0]+'T12:00').getTime();
+  const xs = win.map(k => (new Date(k+'T12:00').getTime() - t0)/86400000);
+  const ys = win.map(k => day(k).w);
+  const sx = xs.reduce((a,b)=>a+b,0),  sy = ys.reduce((a,b)=>a+b,0);
+  const sxx = xs.reduce((a,b)=>a+b*b,0), sxy = xs.reduce((a,b,i)=>a+b*ys[i],0);
+  const den = n*sxx - sx*sx;
+  if(den === 0) return {ok:false, n:n, need:10};
+  const slope = (n*sxy - sx*sy)/den;                    // kg/日（減っていれば負）
+
+  const avgIn  = win.reduce((a,k)=>a+intake(k),0)/n;
+  const avgEst = win.reduce((a,k)=>a+baseBurnRaw(k)+exBurn(k),0)/n;
+  const real   = avgIn - slope*7200;                    // 実際の消費 kcal/日
+  const raw    = real/avgEst;
+  const f      = Math.min(1.15, Math.max(0.80, raw));   // 極端な値は丸める（データが短いうちの暴走を防ぐ）
+  const span   = Math.round(xs[n-1]) + 1;
+  // 誤差の目安。日数が短いほど水分の増減に振り回されるので幅を広くとる
+  const err = Math.round(0.35*7200/Math.max(7, span));
+  return {ok:true, n:n, span:span, slope:slope, avgIn:Math.round(avgIn),
+          avgEst:Math.round(avgEst), real:Math.round(real), f:f, raw:raw, err:err,
+          clamped:Math.abs(raw-f) > 0.005};
+}
+function calibFactor(){
+  if(!DB.settings.calibOn) return 1;
+  if(_calibCache === null){ const c = calib(); _calibCache = c.ok ? c.f : 1; }
+  return _calibCache;
+}
+function toggleCalib(){
+  const c = calib();
+  if(!c.ok){ toast('記録があと'+(c.need-c.n)+'日分必要です'); return; }
+  DB.settings.calibOn = !DB.settings.calibOn;
+  save(); renderSet(); render();
+  toast(DB.settings.calibOn ? '実測補正をオンにしました' : '実測補正をオフにしました');
+}
 /* 歩く分の消費。歩数が入っていれば歩数を優先（朝のウォーキングも歩数に含まれるため、
    分数と両方足すと二重計上になる）。3000歩ぶんは生活代謝の活動係数に含まれるとみなして差し引く。 */
 function walkBurn(k){
@@ -1189,62 +1531,100 @@ function renderHome(){
    今日の指摘 — その日の記録を見て、いま一番効くことを1つだけ出す
    優先度の高い順に判定し、最初に当たったものを表示する。
    ========================================================= */
-function adviceOfToday(){
+/* =========================================================
+   今日の指摘
+   優先度の高い順に最大3件返す。甘い言葉は出さない。
+   ========================================================= */
+const BOOZE = /ハイボール|ビール|焼酎|日本酒|ワイン|サワー|チューハイ|梅酒|ウイスキー|カクテル/;
+
+function adviceList(){
   const D = day(cur), tgt = targetIntake(cur), got = intake(cur);
   const p = protein(cur), pNeed = Math.round(curWeight(cur)*1.6);
   const f = fat(cur), fr = fatRange(cur);
-  const hour = (cur === isoToday()) ? new Date().getHours() : 23;   // 過去日は一日の終わりとして評価
+  const isToday = (cur === isoToday());
+  const hour = isToday ? new Date().getHours() : 23;   // 過去日は一日の終わりとして評価
   const sets = Object.values((D.wk&&D.wk.sets)||{}).reduce((a,b)=>a+(b||0),0);
+  const out = [];
+  const add = (t, b) => { if(out.length < 3) out.push([t, b]); };
 
-  // 体重が未記録
-  if(!D.w) return ['まず体重を測ってください。','これだけは毎日。記録が途切れるのは、測らなかった日からです。'];
+  /* --- 体重 --- */
+  if(!D.w) add('体重が記録されていません。',
+    'これだけは毎日。<b>朝・トイレの後・着替える前</b>に固定してください。測る条件がバラバラだと、体重は1kg簡単に動きます。');
 
-  // 脂質オーバー
-  if(f > fr.hi)
-    return ['脂質が '+(f-fr.hi)+'g オーバーしています。',
-            '目安は '+fr.lo+'〜'+fr.hi+'g。揚げ物・洋菓子・肉の脂を1つ減らすと戻ります。魚の脂は削らなくて構いません。'];
+  /* --- 食事の記録漏れ。実際の摂取が記録より多いと、赤字は帳簿の上にしか存在しなくなる --- */
+  const times = ['朝','昼','夜'];
+  const miss = times.filter(t => !D.meals.some(m => m.t === t));
+  const missDue = miss.filter(t => (t==='朝' && hour>=11) || (t==='昼' && hour>=16) || (t==='夜' && hour>=21));
+  if(missDue.length && got > 0)
+    add(missDue.join('・')+'の記録が空です。',
+      '食べていないなら問題ありません。<b>食べたのに入れていないなら、この日の数字は全部うそになります。</b>'+
+      '少なく記録して喜んでも、体重計は騙せません。分からない外食は多めに選んでください。');
 
-  // タンパク質が足りない（ある程度食べた後で判定）
-  if(got > tgt*0.5 && p < pNeed*0.7){
-    const need = pNeed - p;
-    return ['タンパク質があと '+need+'g 足りません。',
-            'ゆで卵2個で12g、納豆1パックで8g、サラダチキン1個で23g。'+
-            (hour>=19 ? '寝る前でも足せます。' : '次の食事で足してください。')];
+  /* --- 酒 --- */
+  const booze = D.meals.filter(m => BOOZE.test(m.n));
+  if(booze.length){
+    const bk = Math.round(booze.reduce((a,m)=>a+m.k,0));
+    add('お酒 '+booze.length+'杯・'+bk+'kcal。',
+      'カロリーそのものより問題なのは、<b>アルコールを処理している数時間、体は脂肪を燃やすのを止める</b>ことです。'+
+      'やめろとは言いません。<b>飲む日は揚げ物と肉の脂を抜いてください。</b>');
   }
 
-  // 食べなさすぎ（夜になっても大幅に足りない）
-  if(hour >= 19 && got < tgt*0.65)
-    return ['今日は食べなさすぎです。あと '+(tgt-got)+'kcal 食べて構いません。',
-            '削りすぎると体が省エネに切り替わり、落ちるのは脂肪ではなく筋肉になります。'];
+  /* --- 脂質 --- */
+  if(f > fr.hi)
+    add('脂質が '+(f-fr.hi)+'g オーバー。',
+      '目安は '+fr.lo+'〜'+fr.hi+'g。脂質は1gで9kcal、糖質の倍以上あります。'+
+      '揚げ物・洋菓子・肉の脂を1つ減らせば戻ります。<b>魚の脂は削らなくて構いません。</b>');
 
-  // 運動が何もない
+  /* --- タンパク質 --- */
+  if(got > tgt*0.45 && p < pNeed*0.8)
+    add('タンパク質があと '+(pNeed-p)+'g 足りません。',
+      'ゆで卵2個で12g、納豆1パックで8g、サラダチキン1個で23g、プロテイン1杯で20g。'+
+      '<b>ここが足りない減量は、脂肪ではなく筋肉が落ちます。</b>'+(hour>=19?'寝る前でも足せます。':''));
+
+  /* --- 食べなさすぎ --- */
+  if(hour >= 19 && got > 0 && got < tgt*0.7)
+    add('食べなさすぎです。あと '+(tgt-got)+'kcal 食べて構いません。',
+      '削りすぎると体は省エネに切り替わり、落ちるのは脂肪ではなく筋肉になります。'+
+      '<b>筋肉が落ちた分だけ、その後は太りやすい体になります。</b>');
+
+  /* --- 運動 --- */
   if(hour >= 17 && !D.rest && sets === 0 && !D.run && !D.walk && !D.steps)
-    return ['今日はまだ体を動かしていません。',
-            '20分歩くだけでも構いません。きつい日は「休養日」にすれば記録は途切れません。'];
+    add('今日はまだ体を動かしていません。',
+      '20分歩くだけでも構いません。きつい日は<b>「休養日」にすれば記録は途切れません</b>。'+
+      '途切れるのは、やらなかった日ではなく、記録しなかった日からです。');
+  const totSets = (WORKOUTS[D.wk.type]||WORKOUTS.A).items.reduce((a,i)=>a+i.sets,0);
+  if(isToday && hour >= 17 && !D.rest && sets > 0 && sets < totSets)
+    add('筋トレが '+sets+'/'+totSets+'セットで止まっています。',
+      '残りは約'+Math.max(1,Math.round((totSets-sets)*1.3))+'分です。<b>最後の1種目を飛ばす日が続くと、その部位だけ伸びません。</b>');
 
-  // 江戸度が低い
+  /* --- 江戸度 --- */
   const er = edoRate(cur);
   if(er.pct !== null && er.pct < 60 && got > tgt*0.5)
-    return ['江戸度が '+er.pct+'% まで下がっています。',
-            (er.ng.length ? '今日の江戸外：'+er.ng.slice(0,3).map(m=>m.n).join('、') : '')+
-            '　和食に寄せると、脂質は自然に落ちます。'];
+    add('江戸度が '+er.pct+'% まで落ちています。',
+      (er.ng.length ? '今日の江戸外：'+er.ng.slice(0,3).map(m=>m.n).join('、')+'。' : '')+
+      '和食に寄せると、脂質は意識しなくても落ちます。');
 
-  // タンパク質は足りたが、脂質が下限割れ
+  /* --- 脂質の下限割れ --- */
   if(got > tgt*0.7 && f < fr.lo)
-    return ['脂質を削りすぎています（'+f+'g／下限'+fr.lo+'g）。',
-            '脂質が不足するとホルモンが下がり、筋肉が落ちやすくなります。卵や魚で足してください。'];
+    add('脂質を削りすぎです（'+f+'g／下限'+fr.lo+'g）。',
+      '脂質が不足するとホルモンが下がり、筋肉が落ちやすくなります。卵・魚・ナッツで足してください。');
 
-  // ここまで問題なし
-  if(p >= pNeed*0.9 && f >= fr.lo && f <= fr.hi && got > tgt*0.6)
-    return ['今日は文句なしの内容です。','タンパク質'+p+'g、脂質'+f+'g、どちらも狙いどおり。この日を増やせば体は変わります。'];
-
-  if(hour < 12 && got < tgt*0.3) return ['今日はここからです。','朝にタンパク質を20g入れておくと、一日の合計が楽になります（卵2個＋納豆で20g）。'];
-  return ['今のところ順調です。','このまま夜の食事でタンパク質を40g前後とれば、今日の目標は達成できます。'];
+  /* --- 良い日 --- */
+  if(!out.length){
+    if(p >= pNeed*0.9 && f >= fr.lo && f <= fr.hi && got > tgt*0.7 && D.w)
+      return [['今日は文句なしです。','タンパク質'+p+'g、脂質'+f+'g、どちらも狙いどおり。<b>この日を週5回に増やせば、体は必ず変わります。</b>']];
+    if(hour < 12)
+      return [['今日はここからです。','朝にタンパク質を20g入れておくと、一日の合計がぐっと楽になります（卵2個＋納豆でちょうど20g）。']];
+    return [['今のところ問題なしです。','夜の食事でタンパク質を40g前後とれば、今日は達成できます。']];
+  }
+  return out;
 }
+function adviceOfToday(){ return adviceList()[0]; }
 function paintAdvice(){
-  const a = adviceOfToday();
-  document.getElementById('adviceText').innerHTML =
-    '<b style="color:var(--fg)">'+esc(a[0])+'</b><br><span style="color:var(--dim)">'+a[1]+'</span>';
+  document.getElementById('adviceText').innerHTML = adviceList().map((a,i)=>
+    '<div style="'+(i?'margin-top:13px;padding-top:13px;border-top:1px solid var(--line)':'')+'">'+
+    '<b style="color:var(--fg)">'+esc(a[0])+'</b><br>'+
+    '<span style="color:var(--dim)">'+a[1]+'</span></div>').join('');
 }
 
 /* ---------- 今日の一言（日替わり） ---------- */
@@ -1514,12 +1894,21 @@ function renderTrain(){
   document.getElementById('wkTitle').textContent = W.name;
   document.getElementById('wkTips').innerHTML = W.tip;
 
+  // 強度レベル。自重は重りを足せないので、回数ではなく「難しさ」を上げる。
+  const lv = DB.settings.lv || 2;
+  const LVN = [['Lv1','基本'],['Lv2','ゆっくり'],['Lv3','応用']];
+  document.getElementById('lvBar').innerHTML = LVN.map((x,i)=>
+    '<button class="'+(lv===i+1?'on':'')+'" onclick="setLv('+(i+1)+')"><b>'+x[0]+'</b>'+x[1]+'</button>').join('');
+
   document.getElementById('exList').innerHTML = W.items.map(it=>{
     const done = (D.wk.sets[it.id]||0);
     const btns = Array.from({length:it.sets}, (_,i)=>
       '<button class="'+(i<done?'on':'')+'" onclick="setDone(\''+it.id+'\','+(i+1)+')">'+(i+1)+'</button>').join('');
-    return '<div class="ex"><div class="exh"><div><div class="exn">'+it.n+'</div>'+
-           '<div class="exd">'+it.d+'</div></div></div><div class="sets">'+btns+'</div></div>';
+    return '<div class="ex"><div class="exh">'+
+           '<div class="exhead" onclick="openEx(\''+it.id+'\')">'+
+           '<div class="exn">'+it.n+'<span class="q">?</span></div>'+
+           '<div class="exd">'+exDesc(it)+'</div></div></div>'+
+           '<div class="sets">'+btns+'</div></div>';
   }).join('');
 
   const done = Object.values(D.wk.sets||{}).reduce((a,b)=>a+(b||0),0);
@@ -1686,6 +2075,50 @@ function drawChart(){
 }
 
 /* ---------- 設定 ---------- */
+/* 筋肉を保てる上限ペース（週あたり体重の0.75%）で、目標体重に届く日を逆算する */
+function feasibleGoalD(){
+  const w = curWeight(isoToday()), s = DB.settings;
+  const left = Math.max(0, w - s.goalW);
+  if(left <= 0) return s.goalD;
+  return addDays(isoToday(), Math.ceil(left / (w*0.0075) * 7));
+}
+function applyGoalD(){
+  DB.settings.goalD = feasibleGoalD();
+  save(); renderSet(); render();
+  toast('目標日を '+DB.settings.goalD+' にしました');
+}
+function paintCalib(){
+  const c = calib(), box = document.getElementById('calibBox'), btn = document.getElementById('calibBtn');
+  if(!c.ok){
+    box.innerHTML = '<div class="tip">体重と食事の両方がそろった日が <b style="color:var(--fg)">'+c.n+
+      '日分</b>あります。<b style="color:var(--fg)">'+c.need+'日分</b>たまると計算できます。<br>'+
+      '（水分の増減にごまかされないよう、最低でも10日は必要です）</div>';
+    btn.textContent = 'あと'+(c.need-c.n)+'日分の記録が必要です';
+    btn.classList.remove('pri');
+    return;
+  }
+  const on = !!DB.settings.calibOn;
+  const wk = (c.slope*7).toFixed(2);
+  const diff = Math.round(c.real - c.avgEst);
+  const prec = c.span >= 21 ? '高' : (c.span >= 14 ? '中' : '低');
+  box.innerHTML =
+    '<div class="tip" style="line-height:1.9">'+
+    '<b style="color:var(--fg)">直近'+c.span+'日間の実測</b><br>'+
+    '体重の動き　<b style="color:var(--fg)">週 '+(c.slope>=0?'+':'')+wk+' kg</b><br>'+
+    '平均の摂取　<b style="color:var(--fg)">'+c.avgIn.toLocaleString()+' kcal</b><br>'+
+    'アプリの推定消費　'+c.avgEst.toLocaleString()+' kcal<br>'+
+    '<b style="color:var(--accent)">実測から逆算した消費　'+c.real.toLocaleString()+' kcal</b>'+
+    '<span style="color:var(--dim2)">（±'+c.err+'・精度'+prec+'）</span><br>'+
+    '<span style="color:'+(diff<0?'var(--bad)':'var(--good)')+'">ズレ　'+(diff>=0?'+':'')+diff+' kcal/日</span>'+
+    (c.clamped ? '<br><span style="color:var(--dim2);font-size:11px">※ 差が大きすぎるため、安全側に丸めて使います（補正は最大±20%まで）</span>' : '')+
+    '</div>'+
+    (on ? '<div class="tiny" style="margin-top:10px;color:var(--good)">'+
+          '補正は<b>オン</b>です。目安カロリーは実測ベースの '+Math.round(c.f*100)+'% で計算しています。</div>'
+        : '<div class="tiny" style="margin-top:10px">'+
+          'オンにすると、目安カロリーが実測ベース（'+Math.round(c.f*100)+'%）で計算し直されます。</div>');
+  btn.textContent = on ? '実測補正をオフにする' : '実測補正をオンにする';
+  btn.classList.toggle('pri', !on);
+}
 function renderSet(){
   const s = DB.settings;
   renderPhotoSet();
@@ -1702,15 +2135,21 @@ function renderSet(){
   document.getElementById('sStartD').value = s.startD;
   document.getElementById('sGoalD').value  = s.goalD;
 
+  paintCalib();
+
   const w = curWeight(cur), b = Math.round(bmr(w)), base = baseBurn(cur);
   const need = needDeficit(cur), tgt = targetIntake(cur);
   const days = Math.max(1, diffDays(isoToday(), s.goalD));
   const perWeek = (w-s.goalW)/days*7;
   let warn = '';
-  if(perWeek > w*0.01)
-    warn = '<div class="warn" style="margin-top:10px">今のペース設定は週 '+perWeek.toFixed(2)+
-           'kg減。体重の1%（'+(w*0.01).toFixed(2)+'kg）を超えており、筋肉が落ちやすい領域です。'+
-           '目標日を2〜4週間うしろにずらすと、同じ見た目でも維持しやすい体になります。</div>';
+  if(perWeek > w*0.0075){
+    const fd = feasibleGoalD();
+    warn = '<div class="warn" style="margin-top:10px">今のペース設定は<b>週 '+perWeek.toFixed(2)+
+           'kg減</b>。筋肉を保てる上限は週'+(w*0.0075).toFixed(2)+'kg（体重の0.75%）で、それを超えています。<br>'+
+           'このペースだと落ちるのは脂肪だけではありません。<b>筋肉が減った体は、その後リバウンドしやすくなります。</b><br>'+
+           '同じ '+s.goalW+'kg でも、目標日を <b>'+fd+'</b> にすれば無理なく届きます。'+
+           '<button class="btn sm pri" style="margin-top:9px" onclick="applyGoalD()">この日付にする</button></div>';
+  }
   document.getElementById('setCalc').innerHTML =
     '<b style="color:var(--fg)">今の設定での計算</b><br>'+
     '基礎代謝 '+b+' kcal（何もしなくても消費）<br>'+
