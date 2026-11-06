@@ -355,6 +355,68 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
 .phset .thumb{width:46px; height:60px; border-radius:8px; background:var(--card2); object-fit:cover; flex:none;}
 .phset .nm{flex:1; font-size:13px; font-weight:600;}
 .phset .nm small{display:block; color:var(--dim2); font-size:11px; font-weight:400; margin-top:2px;}
+
+/* ===== v2：カードが順番に浮かび上がる ===== */
+main > section:not(.hide) > *{ animation:rise .46s var(--ease) both; }
+main > section:not(.hide) > *:nth-child(2){animation-delay:.04s}
+main > section:not(.hide) > *:nth-child(3){animation-delay:.08s}
+main > section:not(.hide) > *:nth-child(4){animation-delay:.12s}
+main > section:not(.hide) > *:nth-child(5){animation-delay:.16s}
+main > section:not(.hide) > *:nth-child(6){animation-delay:.20s}
+main > section:not(.hide) > *:nth-child(n+7){animation-delay:.24s}
+
+/* ===== v2：カロリーの輪 ===== */
+.ringwrap{position:relative; width:212px; height:212px; margin:2px auto 4px;}
+.ring{width:100%; height:100%; transform:rotate(-90deg);}
+.ring circle{fill:none; stroke-width:9; stroke-linecap:round;}
+.ring .rtrack{stroke:var(--card2);}
+.ring .rfill{stroke:url(#ringGrad); transition:stroke-dashoffset 1s var(--ease), stroke .3s;}
+.ring .rfill.over{stroke:var(--bad);}
+.ring .rglow{stroke:url(#ringGrad); stroke-width:16; opacity:.13; filter:blur(4px); transition:stroke-dashoffset 1s var(--ease);}
+.rin{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.rin .lbl{margin-bottom:2px;}
+.rin .unit{margin:2px 0 0;}
+
+/* ===== v2：おかえりカード ===== */
+.welcome{background:linear-gradient(140deg,#2a2416,#1b1d25); border:1px solid #5c4a26;}
+.welcome .wl{font-size:10px; color:var(--accent); font-weight:700; letter-spacing:.1em; margin-bottom:8px;}
+.welcome .wm{font-size:15px; font-weight:700; line-height:1.7; margin-bottom:12px;}
+
+/* ===== v2：体型の見える化 ===== */
+.bodyfig{position:relative; background:radial-gradient(120% 80% at 50% 30%,#232838,#171a22); border-radius:14px; padding:8px 0 4px; overflow:hidden;}
+.bodyfig svg{display:block; width:100%; max-width:230px; height:auto; margin:0 auto;}
+.bodyfig .tagL,.bodyfig .tagR{position:absolute; top:12px; font-size:11px; line-height:1.45; color:var(--dim);}
+.bodyfig .tagL{left:14px;} .bodyfig .tagR{right:14px; text-align:right;}
+.bodyfig .tagL b{display:block; font-size:22px; color:var(--fg); font-weight:800; letter-spacing:-.02em;}
+.bodyfig .tagR b{display:block; font-size:15px; color:var(--good); font-weight:800;}
+.bodyfig .tagL i{font-style:normal; color:var(--accent); font-weight:700;}
+input[type=range].bslide{width:100%; -webkit-appearance:none; appearance:none; height:6px; border-radius:99px;
+  background:linear-gradient(90deg,var(--good),var(--accent)); margin:14px 0 4px; padding:0; border:none;}
+input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; border-radius:50%;
+  background:var(--fg); box-shadow:0 2px 8px rgba(0,0,0,.5); border:3px solid var(--accent);}
+.bslbl{display:flex; justify-content:space-between; font-size:10.5px; color:var(--dim2);}
+.prog{height:6px; border-radius:99px; background:var(--card2); overflow:hidden; margin-top:10px;}
+.prog>i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--good)); transition:width 1.1s var(--ease);}
+
+/* ===== v2：食事の検索・セット・くり返し ===== */
+.search{position:relative; margin-bottom:10px;}
+.search input{width:100%; padding:11px 12px 11px 36px; border-radius:12px; background:var(--card2); border:1px solid var(--line); color:var(--fg); -webkit-appearance:none;}
+.search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:17px; height:17px; color:var(--dim2);}
+.food.set{grid-column:1/-1; background:linear-gradient(135deg,#252a36,#1f2330); border:1px solid #333a4b; min-height:0; padding:11px 12px;}
+.food.set .fn{font-size:13.5px;}
+.food.set .fi{font-size:11px; color:var(--dim); line-height:1.5;}
+.repeat{display:flex; gap:8px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none;}
+.repeat::-webkit-scrollbar{display:none;}
+.repeat button{flex:none; text-align:left; padding:10px 12px; border-radius:12px; background:rgba(106,163,204,.13); border:1px solid rgba(106,163,204,.35); max-width:260px; transition:transform .12s var(--ease);}
+.repeat button:active{transform:scale(.97);}
+.repeat b{display:block; font-size:12.5px; color:var(--ai);}
+.repeat span{display:block; font-size:11px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.cnt{font-size:11px; color:var(--dim2); margin:-4px 0 8px;}
+.floatk{position:fixed; z-index:120; pointer-events:none; font-weight:800; font-size:15px; color:var(--accent);
+  text-shadow:0 2px 8px rgba(0,0,0,.6); animation:floatUp .9s var(--ease) forwards;}
+@keyframes floatUp{0%{opacity:0; transform:translate(-50%,0) scale(.7);} 20%{opacity:1; transform:translate(-50%,-10px) scale(1.1);} 100%{opacity:0; transform:translate(-50%,-56px) scale(1);}}
+.savset{font-size:11px; color:var(--ai); padding:4px 0 8px; display:block;}
+#confetti{position:fixed; inset:0; z-index:140; pointer-events:none;}
 </style>
 </head>
 <body>
@@ -408,6 +470,19 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
   <section id="v-home">
     <div id="bkWarn" class="warn hide" style="margin-bottom:12px"></div>
 
+    <div class="card welcome hide" id="welcome">
+      <div class="wl">おかえりなさい</div>
+      <div class="wm" id="wcMsg"></div>
+      <div class="wbox">
+        <input type="number" id="wcW" inputmode="decimal" step="0.1" placeholder="今日の体重">
+        <button class="btn pri" onclick="restart()">ここから再開</button>
+      </div>
+      <div class="tiny" style="margin-top:10px; line-height:1.7">
+        開始日と開始体重を<b style="color:var(--fg)">今日</b>に置き直します。過去の記録は消えません。<br>
+        目標日が無理なペース（週に体重の0.75%超）なら、筋肉を落とさないペースまで自動で後ろへずらします。
+      </div>
+    </div>
+
     <div class="why" onclick="nextWhy()">
       <div class="wl">今日の一言</div>
       <div class="wt" id="whyText"></div>
@@ -421,9 +496,20 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
     </div>
 
     <div class="card budget">
-      <div class="lbl">今日あと食べられる</div>
-      <div><span class="big" id="bLeft">—</span><span class="unit">kcal</span></div>
-      <div class="bar"><i id="bBar" style="width:0%"></i></div>
+      <div class="ringwrap">
+        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#78b98c"/><stop offset="1" stop-color="#d4a95f"/></linearGradient></defs>
+          <circle class="rtrack" cx="60" cy="60" r="52"/>
+          <circle class="rglow" id="bGlow" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+          <circle class="rfill" id="bRing" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        </svg>
+        <div class="rin">
+          <div class="lbl" id="bLbl">今日あと食べられる</div>
+          <span class="big" id="bLeft">—</span><span class="unit">kcal</span>
+        </div>
+      </div>
+      <div class="bar hide"><i id="bBar" style="width:0%"></i></div>
       <div class="muted" id="bSub">—</div>
       <div class="kv">
         <div><span>摂取</span><b id="kIn">0</b></div>
@@ -463,6 +549,25 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <button class="btn ghost full sm" style="margin-top:10px" onclick="toggleEasy()" id="easyBtn">今日はゆるめでいく</button>
     </div>
 
+    <div class="card" id="bodyCard">
+      <div class="row between" style="margin-bottom:10px">
+        <h3 style="margin:0">今の体型と、目標の体型</h3>
+        <span class="tiny">BMIからの推定</span>
+      </div>
+      <div class="bodyfig">
+        <div class="tagL"><span id="bfWho">今</span><b id="bfW">—</b><i id="bfPct">—</i></div>
+        <div class="tagR">目標<b id="bfGoal">—</b><span id="bfGoalPct"></span></div>
+        <div id="bodySvg"></div>
+      </div>
+      <input type="range" class="bslide" id="bfSlide" step="0.1" oninput="slideBody(this.value)">
+      <div class="bslbl"><span id="bfMin">目標</span><span>← 動かすと体型が変わります →</span><span id="bfMax">開始</span></div>
+      <div class="prog"><i id="bfProg"></i></div>
+      <div class="muted" id="bfMsg" style="margin-top:8px; text-align:center"></div>
+      <div class="tiny" style="margin-top:8px">
+        点線＝目標体重のときの輪郭。体脂肪率は身長・年齢・体重からの<b style="color:var(--fg)">推定値</b>（実測ではありません）。体型の傾向を見るためのものです。
+      </div>
+    </div>
+
     <div class="card" id="photoCard">
       <div class="row between" style="margin-bottom:10px">
         <h3 style="margin:0">目指す姿と、今の自分</h3>
@@ -493,7 +598,13 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
       <div class="seglbl"><b>②</b>どれくらい食べた？<span>カロリー表示が連動します</span></div>
       <div class="seg" id="segAmt"></div>
       <div class="seglbl"><b>③</b>食べたものをタップ<span>タップした瞬間に記録されます</span></div>
+      <div id="repeatBox"></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input type="search" id="foodQ" placeholder="料理名で探す（例：さけ、牛丼、ラーメン）" oninput="renderFoodGrid()" autocomplete="off">
+      </div>
       <div class="chips" id="catChips"></div>
+      <div class="cnt" id="foodCnt"></div>
       <div class="foods" id="foodGrid"></div>
     </div>
 
@@ -656,6 +767,12 @@ nav .lb{font-size:10px; font-weight:600; letter-spacing:.02em;}
     </div>
 
     <div class="card">
+      <h3>マイセット</h3>
+      <div class="tiny" style="margin-bottom:10px">「いつもの組み合わせ」を1タップで記録するためのセットです。</div>
+      <div id="mySetList"></div>
+    </div>
+
+    <div class="card">
       <h3>スプレッドシート同期</h3>
       <div class="tiny" style="margin-bottom:12px">
         記録をGoogleスプレッドシートにも自動で書き出します。設定すると
@@ -790,6 +907,8 @@ const DEFAULTS = {
   },
   days:{},        // 'YYYY-MM-DD' : { w, meals[], walk, steps, wk:{type,sets{}}, easy }
   myFoods:[],     // {n,k,p}
+  mySets:[],      // {n, items:[{n,k,p,f,e}]}  自分で保存した「いつもの組み合わせ」
+  celebrated:null,// 「今日のやること全部完了」のお祝いを出した日
   useCount:{},    // 食品名 : 回数
   lastBackup:null,// 最後にファイル書き出しした日
   photos:{goal:null, before:null, now:null},  // 端末内にのみ保存（dataURL）
@@ -869,6 +988,191 @@ const FOODS = {
  ['パスタ(外食)',700,20,25,0]
 ]
 };
+
+/* =========================================================
+   v2 追加の食品（2026-11 追加・約400品）
+   値は日本食品標準成分表・一般的なレシピ・店の公表値をもとにした「目安」。
+   チェーン店の値は時期・店舗で変わるため、ずれていても気にしすぎないこと。
+   ========================================================= */
+const MORE_FOODS = {
+'主食':[
+ ['ごはん 軽め(120g)',187,3.0,0.4,1],['雑穀ごはん(150g)',240,4.5,1.2,1],['赤飯(150g)',279,6.5,0.9,1],
+ ['卵かけごはん',310,10,5.7,1],['納豆ごはん',334,12,5.5,1],['お茶漬け1杯',250,5,1,1],
+ ['おにぎり 鮭',185,5.5,1.2,1],['おにぎり 梅',170,3,0.4,1],['おにぎり 昆布',175,3.5,0.4,1],
+ ['おにぎり ツナマヨ',230,5,7,0],['焼きおにぎり',200,4,0.5,1],['いなり寿司2個',260,6,8,1],
+ ['太巻き2切',200,5,2,1],['もち1個',112,2,0.3,1],['そうめん2束',356,9.5,1.1,1],['にゅうめん',250,8,2,1]
+],
+'麺・丼':[
+ ['かけうどん',300,8,1.5,1],['きつねうどん',420,12,8,1],['月見うどん',380,14,6.5,1],['肉うどん',500,18,12,0],
+ ['カレーうどん',550,15,18,0],['鍋焼きうどん',500,20,12,1],['焼きうどん',500,14,15,0],
+ ['ざるそば',320,12,2,1],['かけそば',350,13,2.5,1],['とろろそば',400,15,3,1],['にしんそば',500,22,14,1],['鴨南蛮そば',550,22,20,1],
+ ['醤油ラーメン',470,20,13,0],['塩ラーメン',450,18,12,0],['味噌ラーメン',600,22,20,0],['とんこつラーメン',650,25,28,0],
+ ['つけ麺',750,28,18,0],['冷やし中華',500,18,15,0],['焼きそば',550,14,22,0],['ちゃんぽん',700,28,25,0],
+ ['天丼',800,22,22,1],['親子丼',700,30,18,1],['海鮮丼',650,32,8,1],['鉄火丼',550,35,3,1],['ネギトロ丼',650,22,18,1],
+ ['鮭いくら丼',620,30,12,1],['うな丼',700,25,22,1],['かつ丼',900,30,30,0],['中華丼',700,18,22,0],['天津飯',650,16,26,0],
+ ['ビビンバ',650,20,20,0],['ロコモコ',800,28,35,0],['オムライス',750,20,28,0],['ドリア',600,18,25,0],['ハヤシライス',700,15,22,0],
+ ['ナポリタン',650,18,20,0],['ミートソースパスタ',650,22,20,0],['カルボナーラ',800,26,38,0],['ペペロンチーノ',550,14,22,0],
+ ['和風きのこパスタ',550,15,16,0],['たらこパスタ',600,18,20,0]
+],
+'パン・朝食':[
+ ['食パン8枚切1枚',112,4,1.9,0],['食パン4枚切1枚',223,8,3.9,0],['トースト(バター)',190,5.4,8.5,0],['トースト(ジャム)',190,5.4,2.8,0],
+ ['ロールパン1個',95,3,2.7,0],['クロワッサン1個',180,3.5,11,0],['ベーグル1個',250,9,1.8,0],['イングリッシュマフィン',135,4.5,2.5,0],
+ ['メロンパン',400,7,14,0],['カレーパン',320,6,18,0],['あんぱん',280,7,5,0],['サンドイッチ(たまご)',300,10,17,0],
+ ['サンドイッチ(ハム野菜)',250,10,11,0],['ホットドッグ',300,10,16,0],['シリアル40g+牛乳',230,8,5,0],['グラノーラ50g+牛乳',350,9,12,0],
+ ['ゆで卵1個',76,6.2,5.2,1],['目玉焼き1個',100,6.2,8,1],['スクランブルエッグ',180,12,14,0],['ハムエッグ',200,14,15,0],
+ ['ウインナー3本',190,7,17,0],['ベーコン2枚',160,5,15,0],['チーズ1枚',60,3.8,4.5,0],['ハム2枚',40,3.5,2.5,0]
+],
+'主菜':[
+ ['鯖の味噌煮',280,20,16,1],['鰯の梅煮',230,19,12,1],['鰈の煮付け',170,22,3,1],['鰤大根',300,22,15,1],
+ ['鮭の味噌漬け焼き1切',150,18,5,1],['鮭のホイル焼き',180,22,7,1],['鯛の塩焼き',150,22,6,1],['ホッケの開き半身',230,25,13,1],
+ ['しめ鯖',250,15,19,1],['まぐろ赤身刺身',100,22,1,1],['カツオのたたき',130,26,1.5,1],['いか刺し',80,15,1,1],
+ ['たこ100g',76,16,0.7,1],['ほたて刺身5個',90,17,0.5,1],['鮭の南蛮漬け',220,18,10,1],['あじフライ2枚',330,17,22,0],
+ ['えびフライ3本',350,15,20,0],['牡蠣フライ5個',400,12,25,0],['海老の天ぷら2本',200,10,12,1],
+ ['鶏むねの照り焼き150g',260,34,6,1],['鶏むねの生姜焼き150g',250,34,6,1],['ささみの梅しそ焼き3本',180,35,1.5,1],
+ ['鶏むねのレンジ蒸し150g',170,34,2.5,1],['鶏ハム100g',120,24,2,1],['鶏の照り焼き(もも)',330,25,20,1],
+ ['鶏の水炊き1人前',300,30,15,1],['軍鶏鍋1人前',350,30,18,1],['チキンソテー',350,30,24,0],['チキン南蛮',650,25,45,0],
+ ['豚の生姜焼き',400,22,28,0],['とんかつ1枚',450,22,30,0],['ヒレカツ',350,24,20,0],['回鍋肉',400,15,28,0],
+ ['麻婆豆腐',300,17,20,0],['酢豚',450,15,25,0],['エビチリ',250,18,12,0],['青椒肉絲',350,15,25,0],['八宝菜',300,15,18,0],
+ ['肉じゃが',300,12,10,0],['肉豆腐',300,20,15,0],['すき焼き1人前',600,25,35,0],['牛しゃぶ1人前',450,25,30,0],
+ ['牛すじ煮込み',250,20,15,0],['ローストビーフ80g',150,17,8,0],['ステーキ150g',380,30,28,0],
+ ['焼肉 赤身150g',350,30,24,0],['焼肉 カルビ150g',570,20,52,0],['ミートボール5個',250,11,15,0],['ロールキャベツ2個',300,15,15,0],
+ ['クリームシチュー',400,15,22,0],['ビーフシチュー',450,18,25,0],['グラタン',500,18,28,0],
+ ['高野豆腐の煮物',120,9,5,1],['がんもどきの煮物',180,12,12,1],['油揚げ1枚',110,7,9,1],['豆腐ステーキ',230,14,16,0],
+ ['卵焼き(甘め)',150,9,8.5,1],['温泉卵1個',80,6.5,5.5,1],['ツナ缶(油漬)',200,13,16,0],['鮭フレーク大さじ2',40,4,2.5,1]
+],
+'副菜':[
+ ['きゅうりとわかめの酢の物',30,1,0.2,1],['きゅうりの浅漬け',15,0.5,0.1,1],['かぶの浅漬け',15,0.5,0.1,1],['ぬか漬け',20,1,0.1,1],
+ ['たくあん3切',20,0.3,0,1],['梅干し1個',5,0.1,0,1],['らっきょう5個',30,0.2,0.1,1],['のり1枚',6,1.2,0.1,1],
+ ['なすの煮浸し',60,1.5,0.3,1],['なすの揚げ浸し',150,1.5,12,1],['焼きなす',40,1.2,0.2,1],['厚揚げの焼き浸し',130,9,9,1],
+ ['かぼちゃの煮物',120,2,0.3,1],['里芋の煮っころがし',110,2,0.2,1],['ふろふき大根',70,2,1,1],['たけのこ土佐煮',50,3,0.2,1],
+ ['こんにゃくの煮物',40,0.5,0.1,1],['こんにゃく田楽',60,2,1,1],['ぜんまい煮',80,2,3,1],['白和え',110,6,5,1],
+ ['小松菜のおひたし',20,1.5,0.2,1],['小松菜と油揚げの煮浸し',90,5,5.5,1],['春菊の胡麻和え',60,2.5,3.5,1],['いんげんの胡麻和え',60,2.5,3.5,1],
+ ['オクラ納豆',110,9,5,1],['山芋短冊',60,2,0.3,1],['大根おろし',20,0.4,0.1,1],['しいたけ焼き',20,2,0.3,1],['海藻サラダ',30,1.5,0.3,1],
+ ['トマト1個',30,1,0.2,0],['キャベツ千切り',25,1.3,0.2,0],['蒸し野菜',60,3,0.4,0],['ゆで卵サラダ',150,8,10,0],
+ ['コールスロー',120,1.5,9,0],['ごぼうサラダ',150,2,11,0],['マカロニサラダ',200,4,13,0],['春雨サラダ',130,2,4,0],
+ ['ほうれん草ソテー',90,3,7,0],['もやし炒め',120,3,9,0],['きのこのソテー',80,3,6,0],['メンマ',30,0.5,2,0],['ザーサイ',10,0.5,0.1,0]
+],
+'汁物':[
+ ['なめこの味噌汁',40,2.5,1,1],['大根の味噌汁',40,2,1,1],['わかめの味噌汁',35,2.2,1,1],['しじみの味噌汁',40,3,1,1],
+ ['なすの味噌汁',45,2,1,1],['油揚げの味噌汁',70,4,4.5,1],['インスタント味噌汁',35,2,1,1],['粕汁',150,8,5,1],['お吸い物',15,1,0.1,1],
+ ['卵スープ',60,4,3.5,0],['中華スープ',30,1,1,0],['ミネストローネ',100,3,4,0],['コーンスープ',120,3,5,0],['クラムチャウダー',180,6,10,0]
+],
+'飲み物':[
+ ['緑茶',2,0.2,0,1],['ほうじ茶',0,0,0,1],['甘酒200ml',160,3,0.2,1],['無糖炭酸水',0,0,0,0],
+ ['加糖缶コーヒー',70,1,1,0],['カフェオレ(缶)',100,3,3,0],['オレンジジュース200ml',90,1.4,0.2,0],['飲むヨーグルト200ml',130,6,1,0],
+ ['プロテイン(牛乳割)',250,27,9,0],['エナジードリンク',115,0,0,0],
+ ['ビール中ジョッキ',200,1.5,0,0],['糖質オフビール350ml',100,0.5,0,0],['ノンアルビール',20,0.2,0,0],
+ ['ハイボール濃いめ',110,0,0,0],['レモンサワー(店)',120,0,0,0],['ストロング缶350ml',230,0,0,0],['ストロング缶500ml',330,0,0,0],
+ ['梅酒ロック',150,0.1,0,1],['焼酎ロック',140,0,0,1],['ウイスキー水割り',70,0,0,0],['赤ワイン グラス',90,0.2,0,0]
+],
+'間食':[
+ ['大福1個',230,4.5,0.5,1],['おはぎ1個',230,4.5,1.5,1],['桜餅1個',200,3.5,0.5,1],['きんつば1個',160,3.5,0.5,1],['練り切り1個',100,2,0.2,1],
+ ['あられ30g',115,2.5,0.5,1],['甘栗50g',110,2.5,0.5,1],['干し芋50g',140,1.5,0.3,1],['煎り大豆30g',130,11,6,1],
+ ['小魚アーモンド',120,6,8,0],['チーズ鱈',100,6,5,0],['ビーフジャーキー30g',90,16,2,0],['ハイカカオチョコ3枚',85,1.5,6.5,0],
+ ['ドーナツ1個',300,4,17,0],['シュークリーム',230,5,13,0],['ショートケーキ',350,5,20,0],['プリン',150,4,6,0],
+ ['クッキー3枚',150,2,7,0],['グミ1袋',170,3,0,0],['芋けんぴ30g',140,0.5,6,0],['ポップコーン30g',140,3,7,0],
+ ['ソフトクリーム',150,4,6,0],['ゼリー飲料',180,0,0,0],['プロテインドリンク(パック)',100,15,0,0]
+],
+'果物':[
+ ['りんご1個',140,0.3,0.5,1],['りんご半分',70,0.2,0.2,1],['梨1個',110,0.8,0.3,1],['ぶどう1房',120,0.8,0.2,1],['桃1個',80,1.2,0.2,1],
+ ['すいか1切',80,1.2,0.2,1],['干し柿1個',100,0.6,0.6,1],['びわ3個',70,0.6,0.2,1],['いちご10粒',50,1.3,0.2,0],['キウイ1個',50,1,0.2,0],
+ ['グレープフルーツ半分',50,1,0.1,0],['オレンジ1個',70,1.5,0.2,0],['パイナップル100g',54,0.6,0.1,0],['ブルーベリー50g',25,0.3,0.1,0],
+ ['アボカド半分',130,1.5,13,0]
+],
+'コンビニ':[
+ ['コンビニ 幕の内弁当',700,20,20,1],['コンビニ 焼き鮭弁当',600,22,15,1],['コンビニ のり弁',750,18,28,0],['コンビニ からあげ弁当',850,30,35,0],
+ ['コンビニ パスタ',650,18,22,0],['コンビニ 冷やし中華',480,17,12,0],['コンビニ ざるそば',350,13,2,1],['コンビニ 鍋焼きうどん',450,15,10,1],
+ ['コンビニ サンドイッチ',300,11,15,0],['コンビニ ブリトー',300,10,12,0],['コンビニ サラダ(ドレ込)',120,3,8,0],['コンビニ 蒸し鶏サラダ',150,15,6,0],
+ ['コンビニ 春雨スープ',80,1.5,1.5,0],['コンビニ 豚汁',150,7,8,0],['コンビニ 具だくさん味噌汁',80,4,2.5,1],['コンビニ カップスープ',70,1,2,0],
+ ['コンビニ サラダチキンバー',70,11,2,1],['コンビニ 豆腐バー',120,12,6,1],['コンビニ ゆで卵2個',150,12,10,1],['コンビニ 冷奴',70,6,4,1],
+ ['コンビニ 枝豆',100,10,5,1],['コンビニ 焼き鳥2本',150,14,8,1],['コンビニ ギリシャヨーグルト',90,10,0,0],
+ ['コンビニ 肉まん',250,9,7,0],['コンビニ あんまん',280,6,6,0],['コンビニ フライドチキン',250,13,15,0],['コンビニ フランクフルト',250,9,22,0],
+ ['おでん 大根',10,0.5,0.1,1],['おでん 卵',80,6.5,5,1],['おでん 厚揚げ',90,6,6,1],['おでん こんにゃく',5,0.1,0,1],
+ ['おでん ちくわ',60,6,1,1],['おでん はんぺん',50,5,0.5,1],['おでん 牛すじ',90,10,4,0]
+],
+'チェーン店':[
+ ['吉野家 牛丼 並',635,20,20,0],['吉野家 牛丼 大盛',830,27,27,0],['すき家 牛丼 並',730,22,25,0],['松屋 牛めし 並',700,20,25,0],
+ ['なか卯 親子丼 並',650,28,15,1],['丸亀製麺 かけうどん 並',300,9,1.5,1],['丸亀製麺 釜揚げうどん 並',300,9,1,1],['うどん屋の天ぷら1個',150,3,9,1],
+ ['マクドナルド ハンバーガー',256,13,9.4,0],['マクドナルド チーズバーガー',307,16,13,0],['マクドナルド ビッグマック',525,26,28,0],
+ ['マクドナルド てりやきマック',477,15,30,0],['マクドナルド ポテトM',410,5,21,0],['マクドナルド ナゲット5個',270,16,17,0],
+ ['マクドナルド エッグマフィン',311,19,13.5,0],['モスバーガー',370,15,17,0],['ケンタッキー チキン1ピース',237,18,15,0],
+ ['サイゼリヤ ミラノ風ドリア',520,13,27,0],['CoCo壱 ポークカレー',750,15,25,0],['餃子の王将 餃子6個',350,14,20,0],
+ ['ファミレス ハンバーグ',600,25,40,0],['回転寿司 1皿(2貫)',90,4,1.5,1],['回転寿司 サーモン1皿',110,5,4,1],
+ ['スタバ ドリップ Tall',10,0.5,0,0],['スタバ ラテ Tall',220,11,8.5,0],['スタバ フラペチーノ Tall',380,5,15,0],
+ ['ミスド ポン・デ・リング',220,2,11,0]
+],
+'居酒屋':[
+ ['焼き鳥盛り5本',400,35,22,1],['ねぎま2本',180,15,11,1],['砂肝2本',100,18,2,1],['ささみ串2本',120,22,2,1],['ハツ2本',150,13,10,1],
+ ['皮串2本',250,8,22,1],['手羽先2本',230,15,18,1],['刺身盛り合わせ',200,30,6,1],['たこわさ',60,8,0.5,1],['揚げ出し豆腐',200,8,13,1],
+ ['しらすおろし',50,6,0.6,1],['エイヒレ',100,20,0.5,1],['いかの一夜干し',150,25,2,1],['ししゃも3尾',120,10,8,1],['焼きそら豆',100,10,0.2,1],
+ ['ちくわ磯辺揚げ',180,7,10,1],['もつ煮',250,15,15,0],['軟骨唐揚げ',300,12,22,0],['唐揚げ5個(居酒屋)',500,30,30,0],
+ ['ポテトフライ(居酒屋)',400,5,20,0],['シーザーサラダ',250,7,18,0],['チャンジャ',40,5,1,0],['馬刺し',110,20,2.5,0],
+ ['串カツ5本',500,15,35,0],['お好み焼き',650,20,30,0],['たこ焼き8個',400,13,18,0]
+]
+};
+Object.keys(MORE_FOODS).forEach(c => { FOODS[c] = (FOODS[c]||[]).concat(MORE_FOODS[c]); });
+
+/* =========================================================
+   セット — 1タップで複数品をまとめて記録する
+   [名前, [[食品名, 倍率], ...], 説明]
+   「江戸ごはん」は夕食メニューのシート（8月分）から取った献立
+   ========================================================= */
+const SETS = [
+ ['朝の定番（ごはん・納豆・卵・味噌汁）',[['ごはん 普通(150g)',1],['納豆1パック',1],['卵1個',1],['味噌汁1杯',1]]],
+ ['和朝食（焼き鮭）',[['ごはん 普通(150g)',1],['焼き鮭 1切',1],['味噌汁1杯',1],['漬物 少量',1]]],
+ ['軽い朝（卵かけごはん＋味噌汁）',[['卵かけごはん',1],['インスタント味噌汁',1]]],
+ ['パン朝（トースト・ゆで卵・ヨーグルト）',[['トースト(バター)',1],['ゆで卵1個',1],['ヨーグルト無糖100g',1],['ブラックコーヒー',1]]],
+ ['プロテイン朝（プロテイン＋バナナ）',[['プロテイン1杯',1],['バナナ1本',1]]],
+ ['コンビニ昼（おにぎり2個＋サラダチキン）',[['おにぎり 鮭',1],['おにぎり 梅',1],['サラダチキン1個',1]]],
+ ['コンビニ昼（そば＋ゆで卵）',[['コンビニ ざるそば',1],['コンビニ ゆで卵2個',1]]],
+ ['コンビニ昼（弁当＋味噌汁）',[['コンビニ 焼き鮭弁当',1],['コンビニ 具だくさん味噌汁',1]]],
+ ['うどん屋（かけ＋天ぷら1個）',[['丸亀製麺 かけうどん 並',1],['うどん屋の天ぷら1個',1]]],
+ ['牛丼＋サラダ',[['吉野家 牛丼 並',1],['サラダ(ドレあり)',1]]],
+ ['焼き魚定食（鯖）',[['ごはん 普通(150g)',1],['焼き鯖 1切',1],['味噌汁1杯',1],['ほうれん草おひたし',1],['漬物 少量',1]]],
+ ['刺身定食',[['ごはん 普通(150g)',1],['刺身 6切',1],['味噌汁1杯',1],['冷奴',1],['漬物 少量',1]]],
+ ['江戸ごはん：鮭の塩焼き',[['焼き鮭 1切',1],['冷奴',1],['きゅうりとわかめの酢の物',1],['豆腐の味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：刺身',[['刺身 6切',1],['冷奴',1],['枝豆100g',0.5],['あさりの味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：鶏むね照り焼き',[['鶏むねの照り焼き150g',1],['冷奴',1],['ほうれん草おひたし',1],['大根の味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：鰤の照り焼き',[['鰤の照り焼き1切',1],['納豆1パック',1],['きんぴらごぼう',1],['なめこの味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：ささみ梅しそ',[['ささみの梅しそ焼き3本',1],['冷奴',1],['もずく酢1パック',1],['大根の味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：鮭の味噌漬け',[['鮭の味噌漬け焼き1切',1],['厚揚げの焼き浸し',1],['切り干し大根',1],['わかめの味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['江戸ごはん：鶏むね生姜焼き',[['鶏むねの生姜焼き150g',1],['納豆1パック',1],['きゅうりとわかめの酢の物',1],['豆腐の味噌汁',1],['ごはん 普通(150g)',1]]],
+ ['自炊（鶏むねレンジ蒸し＋サラダ）',[['鶏むねのレンジ蒸し150g',1],['サラダ(ドレなし)',1],['ごはん 軽め(120g)',1],['味噌汁1杯',1]]],
+ ['飲み会（ビール2杯＋つまみ）',[['ビール中ジョッキ',2],['焼き鳥盛り5本',1],['刺身盛り合わせ',1],['枝豆100g',1]]],
+ ['家飲み（ハイボール2杯＋冷奴・枝豆）',[['ハイボール1杯',2],['冷奴',1],['枝豆100g',1]]]
+];
+
+/* 食品名 → データ（セットの展開と検索に使う） */
+const FOOD_MAP = {};
+Object.values(FOODS).flat().forEach(f => { FOOD_MAP[f[0]] = f; });
+SETS.forEach(s => s[1].forEach(it => { if(!FOOD_MAP[it[0]]) console.warn('セットの食品が見つかりません:', it[0]); }));
+function setItems(s){ return s[1].map(it => [FOOD_MAP[it[0]], it[1]]).filter(x => x[0]); }
+function setTotal(s){
+  return setItems(s).reduce((a,x)=>({k:a.k+x[0][1]*x[1], p:a.p+x[0][2]*x[1], f:a.f+x[0][3]*x[1]}), {k:0,p:0,f:0});
+}
+
+/* 検索：ひらがなで打っても漢字の料理名に当たるように、よく使う読みを足しておく */
+const YOMI = {
+ 'さけ':'鮭','しゃけ':'鮭','さば':'鯖','ぶり':'鰤','あじ':'鯵','いわし':'鰯','かれい':'鰈','たい':'鯛','まぐろ':'まぐろ',
+ 'うなぎ':'うな','とり':'鶏','むね':'むね','もも':'もも','ぶた':'豚','ぎゅう':'牛','たまご':'卵','とうふ':'豆腐','なっとう':'納豆',
+ 'ごはん':'ごはん','こめ':'ごはん','めし':'ごはん','みそしる':'味噌汁','みそ':'味噌','ぎゅうどん':'牛丼','どん':'丼',
+ 'てんぷら':'天','やきとり':'焼き鳥','からあげ':'唐揚げ','さしみ':'刺身','すし':'寿司','ていしょく':'定食',
+ 'やさい':'サラダ','ちゃ':'茶','おさけ':'酒','びーる':'ビール','はいぼーる':'ハイボール',
+ 'まっく':'マクドナルド','まく':'マクドナルド','すたば':'スタバ','よしのや':'吉野家','すきや':'すき家','まつや':'松屋',
+ 'まるがめ':'丸亀','さいぜ':'サイゼリヤ','ここいち':'CoCo壱','おうしょう':'王将','こんびに':'コンビニ','せぶん':'コンビニ',
+ 'えど':'江戸','ろーそん':'コンビニ','ふぁみま':'コンビニ','つけもの':'漬','すのもの':'酢の物','にもの':'煮','やきざかな':'焼き'
+};
+function hira(s){ return String(s).toLowerCase().replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0)-0x60)); }
+const YOMI_RE = new RegExp(Object.keys(YOMI).sort((a,b)=>b.length-a.length).join('|'), 'g');   // 長い読みを優先（ぎゅうどん→牛丼 を ぎゅう より先に）
+function matchFood(name, q){
+  const n = hira(name);
+  // スペース区切りは「すべて含む」で絞り込む
+  return hira(q).split(/[\s　]+/).filter(Boolean).every(w => {
+    if(n.includes(w)) return true;
+    const conv = w.replace(YOMI_RE, y => hira(YOMI[y]));   // 1回の置き換えで済ませる（二重に置き換えない）
+    return conv !== w && n.includes(conv);
+  });
+}
 
 /* =========================================================
    筋トレメニュー
@@ -1268,6 +1572,7 @@ function load(){
     const d = JSON.parse(raw);
     d.settings = Object.assign({}, DEFAULTS.settings, d.settings||{});
     d.days = d.days||{}; d.myFoods = d.myFoods||[]; d.useCount = d.useCount||{};
+    d.mySets = d.mySets||[]; if(d.celebrated === undefined) d.celebrated = null;
     if(d.lastBackup === undefined) d.lastBackup = null;
     d.photos = Object.assign({goal:null, before:null, now:null}, d.photos||{});
     d.whyOffset = d.whyOffset||0;
@@ -1466,6 +1771,13 @@ function renderHome(){
   const pct = Math.min(100, got/Math.max(tgt,1)*100);
   const bar = document.getElementById('bBar');
   bar.style.width = pct+'%'; bar.classList.toggle('over', left<0);
+  // 輪：食べた割合だけ描かれる（1フレーム遅らせて、毎回0から伸びる動きを見せる）
+  const C = 326.7, ring = document.getElementById('bRing'), glow = document.getElementById('bGlow');
+  ring.classList.toggle('over', left<0);
+  requestAnimationFrame(()=>{ const off = C*(1-pct/100); ring.style.strokeDashoffset = off; glow.style.strokeDashoffset = off; });
+  document.getElementById('bLbl').textContent = left<0 ? '目安をオーバー' : '今日あと食べられる';
+  paintWelcome();
+  paintBody();
   document.getElementById('bSub').textContent =
     left<0 ? ('目安を '+(-left)+'kcal オーバー　目安 '+tgt+'kcal')
            : ('今日の目安 '+tgt+'kcal ／ 生活代謝 '+baseBurn(cur)+'kcal');
@@ -1517,6 +1829,12 @@ function renderHome(){
     ? '休養日　回復も練習のうち'
     : WORKOUTS[D.wk.type].name+'　'+done+'/'+total+'セット';
   tk('t-meal', D.meals.length>0);
+  // 4つ全部終わった日は、1日1回だけ紙吹雪でお祝いする
+  const allDone = ['t-weight','t-walk','t-train','t-meal'].every(id=>document.getElementById(id).classList.contains('done'));
+  if(allDone && cur===isoToday() && DB.celebrated !== cur){
+    DB.celebrated = cur; saveRaw();
+    setTimeout(()=>{ confetti(); toast('今日のやること、全部完了！'); }, 350);
+  }
   document.getElementById('mealN').textContent = D.meals.length? D.meals.length+'件 '+got+'kcal' : 'まだ0件';
   document.getElementById('easyBtn').textContent = D.easy? '「ゆるめ」を解除する' : '今日はゆるめでいく';
   document.getElementById('easyBtn').classList.toggle('pri', D.easy);
@@ -1762,6 +2080,192 @@ function pickPhoto(input){
   fr.readAsDataURL(f);
 }
 
+/* ---------- おかえり（しばらく空いたあとの再開） ---------- */
+function lastWeighDay(before){
+  const ks = Object.keys(DB.days).filter(k => DB.days[k].w && k < before).sort();
+  return ks.length ? ks[ks.length-1] : null;
+}
+function paintWelcome(){
+  const el = document.getElementById('welcome'), t = isoToday();
+  const lastK = lastWeighDay(t);
+  const gap = lastK ? diffDays(lastK, t) : 0;
+  const show = cur===t && lastK && gap >= 7 && !(DB.days[t] && DB.days[t].w);
+  el.classList.toggle('hide', !show);
+  if(!show) return;
+  document.getElementById('wcMsg').innerHTML =
+    gap+'日ぶりです。前回の記録は '+lastK.slice(5).replace('-','/')+'（'+DB.days[lastK].w+'kg）。<br>'+
+    '空いたことは気にしなくて大丈夫。今日の体重だけ入れて、ここから仕切り直しましょう。';
+}
+function restart(){
+  const v = parseFloat(document.getElementById('wcW').value);
+  if(!v || v<30 || v>200){ toast('今日の体重を入力してください'); return; }
+  const t = isoToday(), s = DB.settings, w = Math.round(v*10)/10;
+  s.startD = t; s.startW = w; day(t).w = w;
+  let note = '';
+  const left = w - s.goalW, days = diffDays(t, s.goalD);
+  if(left > 0 && (days <= 0 || left/(days/7)/w > 0.0075)){
+    s.goalD = feasibleGoalD();
+    note = '目標日を '+s.goalD.slice(0,4)+'/'+s.goalD.slice(5).replace('-','/')+' にずらしました';
+  }
+  save(); render();
+  confetti();
+  toast(note || 'ここから再開。今日が1日目です');
+}
+
+/* ---------- 体型の見える化（2D・推定） ----------
+   体脂肪率は Deurenberg の式（BMI・年齢・性別から推定）で出す。実測ではない。
+   体脂肪率 → 0〜1の「ふくよかさ t」に直し、輪郭の各点の幅を t で動かす。
+   点の数はいつも同じなので、t を少しずつ変えるだけで体型が滑らかに変形する。 */
+function bfOf(w){
+  const s = DB.settings, bmi = w / Math.pow(s.height/100, 2);
+  return 1.2*bmi + 0.23*s.age - 10.8*(s.sex==='male'?1:0) - 5.4;
+}
+function tOf(bf){
+  const base = DB.settings.sex==='male' ? 8 : 15;
+  return Math.max(0, Math.min(1.3, (bf - base) / 18));
+}
+function bodyPts(t){
+  const fem = DB.settings.sex !== 'male';
+  const s = (a,b) => a + b*t, sh = fem ? -4 : 0, hp = fem ? 6 : 0, wa = fem ? -3 : 0;
+  const R = [
+    [s(8,1.5),52],[s(10,3),58],[s(30,3)+sh,64],[s(35,4)+sh,72],[s(31,5)+sh,90],[s(30,7),106],
+    [s(27,12),122],[s(22,22)+wa,140],[s(23,26),154],[s(28,15)+hp,170],[s(30,12)+hp,186],
+    [s(26,9)+hp*.5,212],[s(20,6),242],[s(20,7),262],[s(13,3),292],[13,302],[18,311],[5,312],[5,300],
+    [s(5,1),262],[s(5,2),240],[s(5,4),206],[s(3,2),188],[0,183]
+  ];
+  const body = R.concat(R.slice(0,-1).reverse().map(p=>[-p[0],p[1]]));
+  const A = [
+    [s(33,4)+sh,67],[s(41,6)+sh,79],[s(44,8)+sh,110],[s(45,8)+sh,136],[s(45,6)+sh*.5,164],[s(46,5),180],
+    [s(42,5),193],[s(37,4),181],[s(38,5),164],[s(37,6),136],[s(35,6),110],[s(32,5)+sh,88]
+  ];
+  return { body: body, armR: A, armL: A.map(p=>[-p[0],p[1]]), head:{rx:15+1.6*t, ry:18+t} };
+}
+/* 点の列をなめらかな閉曲線（Catmull-Rom → ベジェ）にする */
+function smoothPath(pts){
+  const n = pts.length, P = pts.map(p=>[100+p[0], p[1]]);
+  let d = 'M'+P[0][0].toFixed(1)+' '+P[0][1].toFixed(1);
+  for(let i=0;i<n;i++){
+    const p0=P[(i-1+n)%n], p1=P[i], p2=P[(i+1)%n], p3=P[(i+2)%n];
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6], c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d += 'C'+c1[0].toFixed(1)+' '+c1[1].toFixed(1)+' '+c2[0].toFixed(1)+' '+c2[1].toFixed(1)+' '+p2[0].toFixed(1)+' '+p2[1].toFixed(1);
+  }
+  return d+'Z';
+}
+const BODY = { t:null, raf:0, built:false, sliding:false, back:0, intro:false };
+function buildBodySvg(){
+  document.getElementById('bodySvg').innerHTML =
+  '<svg viewBox="-10 0 220 326" aria-hidden="true">'+
+  '<defs>'+
+   '<linearGradient id="bgFill" x1="0" y1="0" x2="1" y2="0">'+
+    '<stop offset="0" stop-color="#6b5530"/><stop offset=".38" stop-color="#d4a95f"/><stop offset=".55" stop-color="#e6c487"/>'+
+    '<stop offset=".75" stop-color="#c09450"/><stop offset="1" stop-color="#5e4a29"/></linearGradient>'+
+   '<radialGradient id="bgShade" cx=".5" cy=".42" r=".6"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>'+
+  '</defs>'+
+  '<ellipse cx="100" cy="316" rx="46" ry="6" fill="#000" opacity=".35"/>'+
+  '<path id="bArmL" fill="url(#bgFill)"/><path id="bArmR" fill="url(#bgFill)"/>'+
+  '<path id="bBody" fill="url(#bgFill)"/><path id="bBodyS" fill="url(#bgShade)"/>'+
+  '<ellipse id="bHead" cx="100" cy="30" fill="url(#bgFill)"/>'+
+  '<g id="bAbs" stroke="#5e4a29" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0">'+
+   '<path d="M100 104V152"/><path d="M90 113h7M103 113h7M90 127h7M103 127h7M91 141h6M103 141h6"/>'+
+   '<path d="M78 98q22 9 44 0"/></g>'+
+  '<path id="bGhost" fill="none" stroke="#78b98c" stroke-width="1.6" stroke-dasharray="4 4" opacity=".9"/>'+
+  '</svg>';
+  BODY.built = true;
+}
+function drawBody(t, tGoal){
+  if(!BODY.built) buildBodySvg();
+  const b = bodyPts(t);
+  document.getElementById('bBody').setAttribute('d', smoothPath(b.body));
+  document.getElementById('bBodyS').setAttribute('d', smoothPath(b.body));
+  document.getElementById('bArmR').setAttribute('d', smoothPath(b.armR));
+  document.getElementById('bArmL').setAttribute('d', smoothPath(b.armL));
+  const h = document.getElementById('bHead'); h.setAttribute('rx', b.head.rx); h.setAttribute('ry', b.head.ry);
+  // 体脂肪が低くなるほど、お腹の線がうっすら見えてくる
+  document.getElementById('bAbs').setAttribute('opacity', Math.max(0, Math.min(.85, (0.42 - t)/0.25)).toFixed(2));
+  if(tGoal !== undefined){
+    const g = bodyPts(tGoal);
+    document.getElementById('bGhost').setAttribute('d', smoothPath(g.body)+smoothPath(g.armR)+smoothPath(g.armL));
+  }
+  BODY.t = t;
+}
+function morphBody(to, tGoal, dur){
+  cancelAnimationFrame(BODY.raf);
+  const from = BODY.t === null ? to : BODY.t;
+  if(document.hidden || dur === 0 || Math.abs(from-to) < 0.002){ drawBody(to, tGoal); return; }
+  const t0 = performance.now();
+  drawBody(from, tGoal);
+  const step = now => {
+    const p = Math.min(1, (now-t0)/dur), e = p<.5 ? 4*p*p*p : 1-Math.pow(-2*p+2,3)/2;   // ease-in-out
+    drawBody(from + (to-from)*e);
+    if(p < 1) BODY.raf = requestAnimationFrame(step);
+  };
+  BODY.raf = requestAnimationFrame(step);
+  setTimeout(()=>{ if(BODY.t !== to && p100(BODY.t,to)) drawBody(to); }, dur+120);
+}
+function p100(a,b){ return Math.abs(a-b) > 0.0001; }
+function bodyTags(w, label){
+  const s = DB.settings;
+  document.getElementById('bfWho').textContent = label;
+  document.getElementById('bfW').textContent = w.toFixed(1)+'kg';
+  document.getElementById('bfPct').textContent = '体脂肪 約'+Math.round(bfOf(w))+'%';
+  document.getElementById('bfGoal').textContent = s.goalW.toFixed(1)+'kg';
+  document.getElementById('bfGoalPct').textContent = '約'+Math.round(bfOf(s.goalW))+'%';
+}
+function paintBody(){
+  const s = DB.settings, w = curWeight(cur);
+  const sl = document.getElementById('bfSlide');
+  const hi = Math.max(s.startW, w) + 2, lo = Math.min(s.goalW, w) - 2;
+  sl.min = lo.toFixed(1); sl.max = hi.toFixed(1);
+  document.getElementById('bfMin').textContent = lo.toFixed(0)+'kg';
+  document.getElementById('bfMax').textContent = hi.toFixed(0)+'kg';
+  const tGoal = tOf(bfOf(s.goalW));
+  if(!BODY.sliding){
+    sl.value = w;
+    bodyTags(w, cur===isoToday() ? '今' : wd(cur)+'曜の体重');
+    // 開いた最初の1回だけ、開始時の体型から今の体型へ変形して見せる
+    if(!BODY.intro){ BODY.intro = true; drawBody(tOf(bfOf(Math.max(s.startW, w))), tGoal); setTimeout(()=>morphBody(tOf(bfOf(w)), tGoal, 1400), 250); }
+    else morphBody(tOf(bfOf(w)), tGoal, 900);
+  }
+  const total = s.startW - s.goalW, done = s.startW - w;
+  const pct = total > 0 ? Math.max(0, Math.min(100, done/total*100)) : 0;
+  requestAnimationFrame(()=>{ document.getElementById('bfProg').style.width = pct+'%'; });
+  document.getElementById('bfMsg').innerHTML = total > 0
+    ? '開始 '+s.startW.toFixed(1)+'kg → 今 '+w.toFixed(1)+'kg　<b style="color:var(--fg)">目標までの '+Math.round(pct)+'%</b>'+
+      (w > s.goalW ? '　あと'+(w-s.goalW).toFixed(1)+'kg' : '　<span style="color:var(--good)">達成！</span>')
+    : '';
+}
+function slideBody(v){
+  v = parseFloat(v); BODY.sliding = true;
+  bodyTags(v, 'この体重なら');
+  morphBody(tOf(bfOf(v)), undefined, 0);
+  clearTimeout(BODY.back);
+  BODY.back = setTimeout(()=>{ BODY.sliding = false; paintBody(); }, 2600);   // 指を離して少ししたら「今」に戻る
+}
+
+/* ---------- 紙吹雪 ---------- */
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas'); c.id = 'confetti';
+  const dpr = window.devicePixelRatio||1, W = innerWidth, H = innerHeight;
+  c.width = W*dpr; c.height = H*dpr; document.body.appendChild(c);
+  const g = c.getContext('2d'); g.scale(dpr,dpr);
+  const cols = ['#d4a95f','#78b98c','#6aa3cc','#f0ece4','#d96c56'];
+  const ps = Array.from({length:90}, () => ({
+    x: W/2 + (Math.random()-.5)*60, y: H*0.38, vx:(Math.random()-.5)*11, vy:-Math.random()*12-4,
+    r: Math.random()*Math.PI, vr:(Math.random()-.5)*.4, w:5+Math.random()*5, h:8+Math.random()*6, c: cols[(Math.random()*cols.length)|0]
+  }));
+  const t0 = performance.now();
+  const step = now => {
+    const el = now - t0; g.clearRect(0,0,W,H);
+    ps.forEach(p => { p.vy += .32; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      g.save(); g.translate(p.x,p.y); g.rotate(p.r); g.globalAlpha = Math.max(0, 1 - el/1900);
+      g.fillStyle = p.c; g.fillRect(-p.w/2,-p.h/2,p.w,p.h*Math.abs(Math.cos(p.r*2))); g.restore(); });
+    if(el < 1900) requestAnimationFrame(step); else c.remove();
+  };
+  requestAnimationFrame(step);
+  setTimeout(()=>{ if(c.parentNode) c.remove(); }, 2600);
+}
+
 /* ---------- 小さな動き ---------- */
 /* 数字を今の値から目標値へ滑らかに動かす。差が小さいときは即座に書き換える */
 function animNum(el, to, suffix){
@@ -1831,28 +2335,11 @@ function renderMeal(){
   document.getElementById('segAmt').innerHTML = [[0.5,'半分'],[1,'ふつう'],[1.5,'1.5倍'],[2,'2倍']].map(a=>
     '<button class="'+(a[0]===amt?'on':'')+'" onclick="amt='+a[0]+';renderMeal()">'+a[1]+'</button>').join('');
   // カテゴリ
-  const cats = ['よく使う'].concat(Object.keys(FOODS)).concat(['マイ']);
+  const cats = ['よく使う','セット'].concat(Object.keys(FOODS)).concat(['マイ']);
   document.getElementById('catChips').innerHTML = cats.map(c=>
-    '<button class="'+(c===cat?'on':'')+'" onclick="cat=\''+c+'\';renderMeal()">'+c+'</button>').join('');
-  // 一覧
-  let list;
-  if(cat==='よく使う'){
-    const all = Object.values(FOODS).flat().concat(DB.myFoods.map(f=>[f.n,f.k,f.p,f.f||0,null]));
-    list = all.filter(f=>DB.useCount[f[0]]).sort((a,b)=>DB.useCount[b[0]]-DB.useCount[a[0]]).slice(0,12);
-    if(!list.length) list = [['ごはん 普通(150g)',234,3.8,1],['卵1個',76,6.2,1],['納豆1パック',100,8.3,1],
-                             ['焼き鮭 1切',106,17,1],['味噌汁1杯',40,2.5,1],['もずく酢1パック',23,0.3,1]];
-  } else if(cat==='マイ'){
-    list = DB.myFoods.map(f=>[f.n,f.k,f.p,f.f||0,null]);
-    if(!list.length) list = [];
-  } else list = FOODS[cat];
-
-  document.getElementById('foodGrid').innerHTML = list.length ? list.map(f=>
-    '<button class="food" onclick="addFood('+JSON.stringify(JSON.stringify(f)).replace(/"/g,'&quot;')+', event)">'+
-    '<span class="fn">'+esc(f[0])+'</span>'+
-    '<span class="fk">'+Math.round(f[1]*amt)+' kcal'+
-    '<i>P'+(f[2]*amt).toFixed(1)+' F'+(f[3]*amt).toFixed(1)+'</i>'+
-    edoBadge(f[4])+'</span></button>'
-  ).join('') : '<div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">まだありません</div>';
+    '<button class="'+(c===cat?'on':'')+'" onclick="cat=\''+c+'\';document.getElementById(\'foodQ\').value=\'\';renderMeal()">'+c+'</button>').join('');
+  renderRepeat();
+  renderFoodGrid();
 
   // 食べたもの
   const D = day(), er = edoRate(cur);
@@ -1861,16 +2348,145 @@ function renderMeal(){
     intake(cur)+' kcal / P'+protein(cur)+'g / '+
     '<span style="color:'+(fNow2>fr2.hi?'var(--bad)':'inherit')+'">F'+fNow2+'g</span>'+
     (er.pct===null ? '' : '　<span style="color:'+(er.pct>=80?'var(--good)':'var(--dim)')+'">江戸 '+er.pct+'%</span>');
-  document.getElementById('eatenList').innerHTML = D.meals.length ? D.meals.map((m,i)=>
-    '<div class="eaten"><div class="en">'+esc(m.n)+edoBadge(edoOf(m))+'<small>'+m.t+'</small></div>'+
-    '<div class="ek">'+m.k+'</div><button class="del" onclick="delMeal('+i+')">×</button></div>').join('')
+  // 時間帯ごとにまとめて表示し、2品以上ある時間帯は「マイセットに保存」を出す
+  const times = ['朝','昼','夜','間食'].filter(t => D.meals.some(m=>m.t===t));
+  document.getElementById('eatenList').innerHTML = D.meals.length ? times.map(t => {
+    const rows = D.meals.map((m,i)=>[m,i]).filter(x=>x[0].t===t);
+    const sum = rows.reduce((a,x)=>a+x[0].k,0);
+    return '<div class="seglbl" style="margin-top:8px">'+t+'<span>'+sum+' kcal</span></div>'+
+      rows.map(x=>'<div class="eaten"><div class="en">'+esc(x[0].n)+edoBadge(edoOf(x[0]))+'</div>'+
+        '<div class="ek">'+x[0].k+'</div><button class="del" onclick="delMeal('+x[1]+')">×</button></div>').join('')+
+      (rows.length>=2 ? '<button class="savset" onclick="saveMySet(\''+t+'\')">＋ この'+t+'ごはんを「マイセット」に保存（次から1タップ）</button>' : '');
+  }).join('')
     : '<div class="muted" style="text-align:center;padding:14px">まだ記録がありません</div>';
+}
+
+/* 食品一覧（検索・カテゴリ） */
+function renderFoodGrid(){
+  const q = (document.getElementById('foodQ').value||'').trim();
+  const my = DB.myFoods.map(f=>[f.n,f.k,f.p,f.f||0,null]);
+  const all = Object.values(FOODS).flat().concat(my);
+  let list, sets = [];
+  if(q){
+    list = all.filter(f=>matchFood(f[0], q));
+    sets = SETS.map((s,i)=>['p',i,s]).concat(DB.mySets.map((s,i)=>['m',i,[s.n]])).filter(x=>matchFood(x[2][0], q));
+  } else if(cat==='よく使う'){
+    list = all.filter(f=>DB.useCount[f[0]]).sort((a,b)=>DB.useCount[b[0]]-DB.useCount[a[0]]).slice(0,16);
+    if(!list.length) list = ['ごはん 普通(150g)','卵1個','納豆1パック','焼き鮭 1切','味噌汁1杯','もずく酢1パック'].map(n=>FOOD_MAP[n]);
+  } else if(cat==='セット'){
+    list = [];
+    sets = DB.mySets.map((s,i)=>['m',i,[s.n]]).concat(SETS.map((s,i)=>['p',i,s]));
+  } else if(cat==='マイ'){
+    list = my;
+  } else list = FOODS[cat] || [];
+
+  const setHtml = sets.map(x => {
+    let names, tot;
+    if(x[0]==='p'){ const it = setItems(x[2]); names = it.map(y=>y[0][0]+(y[1]!==1?' ×'+y[1]:'')); tot = setTotal(x[2]); }
+    else { const s = DB.mySets[x[1]]; names = s.items.map(y=>y.n); tot = s.items.reduce((a,y)=>({k:a.k+y.k,p:a.p+(y.p||0),f:a.f+(y.f||0)}),{k:0,p:0,f:0}); }
+    return '<button class="food set" onclick="addSet(\''+x[0]+'\','+x[1]+',event)">'+
+      '<span class="fn">'+(x[0]==='m'?'★ ':'')+esc(x[2][0])+'</span>'+
+      '<span class="fi">'+esc(names.join('・'))+'</span>'+
+      '<span class="fk">'+Math.round(tot.k*amt)+' kcal<i>P'+(tot.p*amt).toFixed(0)+' F'+(tot.f*amt).toFixed(0)+'</i></span></button>';
+  }).join('');
+  const foodHtml = list.map(f=>
+    '<button class="food" onclick="addFood('+JSON.stringify(JSON.stringify(f)).replace(/"/g,'&quot;')+', event)">'+
+    '<span class="fn">'+esc(f[0])+'</span>'+
+    '<span class="fk">'+Math.round(f[1]*amt)+' kcal'+
+    '<i>P'+(f[2]*amt).toFixed(1)+' F'+(f[3]*amt).toFixed(1)+'</i>'+
+    edoBadge(f[4])+'</span></button>').join('');
+  const n = list.length + sets.length;
+  document.getElementById('foodCnt').textContent = q ? ('「'+q+'」で '+n+' 件') : (cat==='セット' ? '1タップでまとめて記録します' : n+' 品');
+  document.getElementById('foodGrid').innerHTML = n ? setHtml + foodHtml
+    : '<div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">'+
+      (q ? '見つかりません。下の「自分で入力」で登録すると、次から出てきます' : 'まだありません')+'</div>';
+}
+
+/* 「前回と同じ」— 選んでいる時間帯で、直近に食べた組み合わせを1タップで再記録 */
+function lastMealsOf(t){
+  const ks = Object.keys(DB.days).filter(k => k < cur && DB.days[k].meals && DB.days[k].meals.some(m=>m.t===t)).sort();
+  if(!ks.length) return null;
+  const k = ks[ks.length-1];
+  return { k:k, items: DB.days[k].meals.filter(m=>m.t===t) };
+}
+function renderRepeat(){
+  const box = document.getElementById('repeatBox');
+  const last = lastMealsOf(mealTime);
+  const btns = [];
+  if(last){
+    const sum = last.items.reduce((a,m)=>a+m.k,0);
+    const dd = diffDays(last.k, cur);
+    btns.push('<button onclick="repeatLast()"><b>↻ 前回の'+mealTime+'と同じ（'+(dd===1?'昨日':dd+'日前')+'）</b>'+
+      '<span>'+esc(last.items.map(m=>m.n).join('・'))+'　'+sum+'kcal</span></button>');
+  }
+  DB.mySets.slice(0,4).forEach((s,i)=>{
+    const sum = s.items.reduce((a,m)=>a+m.k,0);
+    btns.push('<button onclick="addSet(\'m\','+i+',event)"><b>★ '+esc(s.n)+'</b><span>'+esc(s.items.map(m=>m.n).join('・'))+'　'+sum+'kcal</span></button>');
+  });
+  box.innerHTML = btns.length ? '<div class="repeat">'+btns.join('')+'</div>' : '';
+}
+function repeatLast(){
+  const last = lastMealsOf(mealTime); if(!last) return;
+  last.items.forEach(m => { day().meals.push(Object.assign({}, m, {t:mealTime})); DB.useCount[m.n.replace(/ ×[\d.]+$/,'')] = (DB.useCount[m.n.replace(/ ×[\d.]+$/,'')]||0)+1; });
+  const sum = last.items.reduce((a,m)=>a+m.k,0);
+  save(); renderMeal(); toast(last.items.length+'品 +'+sum+' kcal');
+}
+function addSet(kind, i, ev){
+  let items;
+  if(kind==='p'){
+    items = setItems(SETS[i]).map(x => {
+      const f = x[0], m = x[1]*amt;
+      return { n: m===1 ? f[0] : f[0]+' ×'+m, k:Math.round(f[1]*m), p:Math.round(f[2]*m*10)/10, f:Math.round(f[3]*m*10)/10,
+               t:mealTime, e:(f[4]===0||f[4]===1)?f[4]:undefined, _b:f[0] };
+    });
+  } else {
+    items = DB.mySets[i].items.map(m => amt===1 ? Object.assign({}, m)
+      : Object.assign({}, m, {n:m.n+' ×'+amt, k:Math.round(m.k*amt), p:Math.round((m.p||0)*amt*10)/10, f:Math.round((m.f||0)*amt*10)/10}));
+  }
+  items.forEach(m => {
+    const base = m._b || m.n.replace(/ ×[\d.]+$/,''); delete m._b;
+    m.t = mealTime; day().meals.push(m);
+    DB.useCount[base] = (DB.useCount[base]||0)+1;
+  });
+  const sum = items.reduce((a,m)=>a+m.k,0);
+  floatK(ev, '+'+sum);
+  save(); renderMeal(); toast(items.length+'品 +'+sum+' kcal');
+}
+function saveMySet(t){
+  const items = day().meals.filter(m=>m.t===t).map(m=>({n:m.n, k:m.k, p:m.p||0, f:m.f||0, e:m.e}));
+  if(items.length < 2) return;
+  const def = 'いつもの'+t+'ごはん'+(DB.mySets.length ? (DB.mySets.length+1) : '');
+  const n = (prompt('セットの名前', def) || '').trim();
+  if(!n) return;
+  DB.mySets.unshift({n:n, items:items});
+  save(); renderMeal(); renderMySets(); toast('「'+n+'」を保存しました');
+}
+function delMySet(i){
+  if(!confirm('「'+DB.mySets[i].n+'」を削除しますか？（過去の記録は残ります）')) return;
+  DB.mySets.splice(i,1); save(); renderMySets(); toast('削除しました');
+}
+function renderMySets(){
+  const el = document.getElementById('mySetList'); if(!el) return;
+  el.innerHTML = DB.mySets.length ? DB.mySets.map((s,i)=>
+    '<div class="eaten"><div class="en">★ '+esc(s.n)+'<small>'+esc(s.items.map(m=>m.n).join('・'))+'</small></div>'+
+    '<div class="ek">'+s.items.reduce((a,m)=>a+m.k,0)+'</div><button class="del" onclick="delMySet('+i+')">×</button></div>').join('')
+    : '<div class="tiny">まだありません。食事タブで2品以上記録すると「マイセットに保存」が出ます。</div>';
+}
+/* タップした場所から「+234」がふわっと浮かぶ */
+function floatK(ev, text){
+  const b = ev && ev.currentTarget; if(!b) return;
+  const r = b.getBoundingClientRect();
+  const s = document.createElement('div');
+  s.className = 'floatk'; s.textContent = text;
+  s.style.left = (r.left + r.width/2)+'px'; s.style.top = (r.top + 6)+'px';
+  document.body.appendChild(s); setTimeout(()=>s.remove(), 950);
 }
 function addFood(json, ev){
   const f = JSON.parse(json);
   // タップした札を一瞬光らせて、入ったことを分かるようにする
   const btn = ev && ev.currentTarget;
   if(btn){ btn.classList.add('tapped'); setTimeout(()=>btn.classList.remove('tapped'), 450); }
+  floatK(ev, '+'+Math.round(f[1]*amt));
   const name = amt===1 ? f[0] : f[0]+' ×'+amt;
   day().meals.push({ n:name, k:Math.round(f[1]*amt), p:Math.round(f[2]*amt*10)/10,
                      f:Math.round(f[3]*amt*10)/10, t:mealTime,
@@ -2150,6 +2766,7 @@ function renderSet(){
   const s = DB.settings;
   renderPhotoSet();
   renderMyFoods();
+  renderMySets();
   document.getElementById('syUrl').value   = DB.sync.url;
   document.getElementById('syToken').value = DB.sync.token;
   renderSyncStatus();
