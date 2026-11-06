@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="BodyLog">
-<meta name="theme-color" content="#12141a">
+<meta name="theme-color" content="#F5F2EC">
 <title>BodyLog</title>
 <style>
 :root{
@@ -417,6 +417,155 @@ input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24
 @keyframes floatUp{0%{opacity:0; transform:translate(-50%,0) scale(.7);} 20%{opacity:1; transform:translate(-50%,-10px) scale(1.1);} 100%{opacity:0; transform:translate(-50%,-56px) scale(1);}}
 .savset{font-size:11px; color:var(--ai); padding:4px 0 8px; display:block;}
 #confetti{position:fixed; inset:0; z-index:140; pointer-events:none;}
+
+/* =========================================================
+   v3 ライトテーマ（2026-11 案A：生成り×藍）
+   方針：グラデーション・光る演出・枠線をやめる／区切りは影と細い線だけ／
+         強調色は藍の1色。緑＝できた、朱＝オーバー の意味のときだけ色を使う
+   ========================================================= */
+:root{
+  --bg:#F5F2EC; --card:#FFFFFF; --card2:#F3F0EA; --soft:#EEF2F6; --line:#E8E3DA;
+  --fg:#1E2126; --dim:#6E727A; --dim2:#9A9DA3;
+  --accent:#2E5A88; --ai:#2E5A88; --good:#3E8A5C; --bad:#C0502E;
+  --shadow:0 1px 2px rgba(30,33,38,.05), 0 1px 1px rgba(30,33,38,.03);
+  --r:16px;
+}
+body{background:var(--bg);}
+header{background:rgba(245,242,236,.9); border-bottom:1px solid rgba(30,33,38,.06);}
+.arrow{background:transparent; color:var(--dim);}
+.arrow:active{background:var(--card2);}
+.todaybtn{background:var(--accent); color:#fff;}
+.todaybtn.on{background:transparent; color:var(--accent);}
+main > section:not(.hide) > *{animation-name:riseL;}
+@keyframes riseL{ from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:none;} }
+
+.card{border:none; box-shadow:var(--shadow); padding:18px;}
+.card h3{color:var(--fg); font-size:14px; font-weight:600; letter-spacing:0; margin-bottom:12px;}
+.muted{color:var(--dim);} .tiny{color:var(--dim2);}
+
+.why{background:var(--card); border:none; box-shadow:var(--shadow); padding:18px;}
+.why .wl,.welcome .wl{font-size:12px; letter-spacing:0; font-weight:600; color:var(--dim);}
+.why .wt{font-weight:600; color:var(--fg);}
+.why .wi{border-top:1px solid var(--line); color:var(--dim);}
+.welcome{background:#EAF0F6; border:none; box-shadow:none;}
+.welcome .wl{color:var(--accent);}
+.warn{background:#FBF3E4; border:none; color:#7A5A1E;}
+
+.ring .rtrack{stroke:var(--soft);}
+.ring .rfill{stroke:var(--accent); stroke-width:8;}
+.ring .rglow{display:none;}
+.budget .big{font-weight:700; color:var(--fg);}
+.kv{border-top:1px solid var(--line);}
+.kv2{border-top:1px solid var(--line);}
+.kv b{font-weight:600;}
+.bar>i{background:var(--accent);}
+
+.task{background:transparent; border-radius:0; margin:0; padding:13px 2px; border-bottom:1px solid var(--line);}
+.task:last-of-type{border-bottom:none;}
+.task:active{background:var(--card2);}
+.task .ck{width:22px; height:22px; border-width:1.5px; font-size:12px; color:transparent;}
+.task.done .ck{color:#fff;}
+.task .t{font-weight:500;}
+.task.done .t{color:var(--dim2);}
+
+.streak>div{background:var(--card2);}
+.streak b{font-weight:700;}
+
+input[type=number],input[type=text],input[type=date],input[type=search],select,.wbox input{
+  background:var(--card2); border:1px solid transparent; color:var(--fg);}
+input:focus,select:focus{outline:none; border-color:var(--accent); background:#fff;}
+.btn{background:var(--card2); color:var(--fg); font-weight:600;}
+.btn.pri{background:var(--accent); color:#fff;}
+.btn.ghost{border:1px solid var(--line); color:var(--dim);}
+
+.seg{background:#EFEBE4;}
+.seg button{color:var(--dim);}
+.seg button.on{background:#fff; color:var(--fg); box-shadow:0 1px 2px rgba(30,33,38,.1);}
+.seglbl{font-weight:600;}
+.seglbl b{color:var(--accent);}
+
+/* 分類はタブ（選んでいるものに下線） */
+.chips{gap:18px; padding-bottom:0; margin-bottom:2px; box-shadow:inset 0 -1px 0 var(--line);}
+.chips button{background:transparent; border-radius:0; padding:2px 0 10px; color:var(--dim); font-weight:500;
+  border-bottom:2px solid transparent;}
+.chips button.on{background:transparent; color:var(--fg); font-weight:600; border-bottom-color:var(--accent);}
+.chips button:active{transform:none; opacity:.6;}
+.cnt{margin:8px 0 2px;}
+
+/* 食品は1列の行。右にカロリーと＋ */
+.foods{display:block;}
+.food,.food.set{display:flex; flex-direction:row; align-items:center; gap:12px; width:100%; min-height:0;
+  padding:12px 2px; background:transparent; border:none; border-bottom:1px solid var(--line); border-radius:0; text-align:left;}
+.food:last-child{border-bottom:none;}
+.food:active{background:var(--card2); transform:none;}
+.food.tapped{animation:flashL .5s var(--ease);}
+@keyframes flashL{0%{background:#EAF0F6;} 100%{background:transparent;}}
+.food .fn{flex:1; font-size:14px; font-weight:500; line-height:1.4; display:block;}
+.food .fn i{display:block; font-style:normal; font-size:11px; color:var(--dim2); font-weight:400; margin-top:2px;}
+.food .fq{font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--fg);}
+.food .fq small{font-size:10px; color:var(--dim2); font-weight:400; margin-left:2px;}
+.food .plus{width:28px; height:28px; border-radius:50%; background:var(--soft); color:var(--accent);
+  display:grid; place-items:center; font-size:18px; line-height:1; flex:none;}
+.edo{background:transparent !important; padding:0; font-size:10px; font-weight:600; margin-left:6px;}
+.edo.ok{color:var(--good);} .edo.ng{color:var(--dim2);}
+
+.search input{background:var(--card2); border:1px solid transparent;}
+.search svg{color:var(--dim2);}
+.repeat button{background:var(--soft); border:none;}
+.repeat b{color:var(--accent); font-weight:600;}
+.savset{color:var(--accent);}
+.floatk{color:var(--accent); text-shadow:none;}
+.eaten{border-bottom:1px solid var(--line);}
+.eaten .ek{color:var(--fg); font-weight:600;}
+.eaten .del{background:transparent; color:var(--dim2); font-size:17px;}
+
+/* トレ */
+.ex{background:var(--card2);}
+.ex .exn{font-weight:600;}
+.sets button{background:#fff; border:1px solid var(--line); color:var(--dim);}
+.sets button.on{background:var(--good); border-color:var(--good); color:#fff;}
+.lvbar button{background:#fff; border:1px solid var(--line); color:var(--dim);}
+.lvbar button.on{background:var(--accent); border-color:var(--accent); color:#fff;}
+.tip{background:var(--card2); color:var(--dim);}
+.scrim{background:rgba(30,33,38,.35);}
+.sheet{background:var(--card); border-top:none; box-shadow:0 -8px 30px rgba(30,33,38,.12);}
+.sec .st{font-size:12px; letter-spacing:0; font-weight:600; color:var(--accent);}
+.sec .sb{color:var(--dim);}
+.mchip{background:var(--card2); border:none; color:var(--dim);}
+.mchip.p1{background:#EAF0F6; color:var(--accent); border:none;}
+.bodywrap{background:var(--card2);}
+.blabel{letter-spacing:0; font-weight:500;}
+.sil{fill:#fff; stroke:#DCD6CB;}
+.mus{fill:#E2DCD1; opacity:1;}
+.mus.p2{fill:var(--accent); opacity:.25;}
+.mus.p1{fill:var(--accent);}
+
+/* 記録 */
+.legend{color:var(--dim);}
+table.log th{color:var(--dim); border-bottom:1px solid var(--line);}
+table.log td{border-bottom:1px solid var(--line);}
+table.log td:first-child{color:var(--dim);}
+
+/* 体型 */
+.bodyfig{background:var(--card2);}
+.bodyfig .tagL b{color:var(--fg);}
+.bodyfig .tagL i{color:var(--accent);}
+.bodyfig .tagR b{color:var(--good);}
+input[type=range].bslide{background:#E3DED4; height:4px;}
+input[type=range].bslide::-webkit-slider-thumb{background:#fff; border:2px solid var(--accent); box-shadow:0 1px 4px rgba(30,33,38,.2);}
+.prog{background:var(--soft); height:4px;}
+.prog>i{background:var(--accent);}
+
+/* 写真・その他 */
+.ph{background:var(--card2);}
+.phset{border-bottom:1px solid var(--line);}
+nav{background:rgba(255,255,255,.94); border-top:1px solid rgba(30,33,38,.06);}
+nav button{color:var(--dim2);}
+nav button.on{color:var(--accent);}
+.toast{background:var(--fg); color:#fff;}
+#onboard{background:var(--bg);}
+.obox h4{color:var(--accent); letter-spacing:0;}
+.seglbl b{display:none;}
 </style>
 </head>
 <body>
@@ -490,9 +639,9 @@ input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24
       <div class="wi" id="whyNote"></div>
     </div>
 
-    <div class="card" id="adviceCard" style="padding:13px 14px">
-      <div style="font-size:10px;color:var(--ai);font-weight:700;letter-spacing:.1em;margin-bottom:7px">今日の指摘</div>
-      <div id="adviceText" style="font-size:13.5px;line-height:1.8"></div>
+    <div class="card" id="adviceCard">
+      <h3>今日の指摘</h3>
+      <div id="adviceText" style="font-size:14px;line-height:1.8"></div>
     </div>
 
     <div class="card budget">
@@ -634,7 +783,7 @@ input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24
         <button class="btn pri" onclick="saveSteps()">記録</button>
       </div>
       <div class="chips" id="stepQuick" style="margin-top:10px; margin-bottom:0"></div>
-      <button class="btn full sm" style="margin-top:8px" onclick="openHealth()">❤️ ヘルスケアアプリで歩数を見る</button>
+      <button class="btn full sm" style="margin-top:8px" onclick="openHealth()">ヘルスケアアプリで歩数を見る</button>
       <div class="muted" id="stepSub" style="margin-top:10px"></div>
     </div>
 
@@ -696,7 +845,7 @@ input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24
       <h3>体重の推移と予測</h3>
       <canvas id="chart" height="440"></canvas>
       <div class="legend">
-        <span><i style="background:var(--accent)"></i>実測</span>
+        <span><i style="background:#B9BCC2"></i>実測</span>
         <span><i style="background:var(--ai)"></i>7日平均</span>
         <span><i style="background:var(--good)"></i>目標ペース</span>
       </div>
@@ -824,7 +973,7 @@ input[type=range].bslide::-webkit-slider-thumb{-webkit-appearance:none; width:24
         <b style="color:var(--fg)">食べすぎた日</b><br>
         1日の失敗では太りません。翌日いつも通りに戻せば問題ありません。記録をやめることだけが唯一の失敗です。<br><br>
         <b style="color:var(--fg)">歩数の入れ方</b><br>
-        いちばん簡単なのは「❤️ ヘルスケアを開く」を押して数字を見て、戻ってきて数字ボタンを押す方法です。
+        いちばん簡単なのは「ヘルスケアアプリで歩数を見る」を押して数字を見て、戻ってきて数字ボタンを押す方法です。
         だいたいで構いません。100歩単位の正確さは結果に影響しません。<br><br>
         <b style="color:var(--fg)">ショートカットで自動化したい場合</b><br>
         「ショートカット」アプリで、ヘルスケアの歩数を取得 →「URLを開く」で下のURLの末尾に歩数をつけて開く、
@@ -2157,18 +2306,17 @@ function buildBodySvg(){
   '<svg viewBox="-10 0 220 326" aria-hidden="true">'+
   '<defs>'+
    '<linearGradient id="bgFill" x1="0" y1="0" x2="1" y2="0">'+
-    '<stop offset="0" stop-color="#6b5530"/><stop offset=".38" stop-color="#d4a95f"/><stop offset=".55" stop-color="#e6c487"/>'+
-    '<stop offset=".75" stop-color="#c09450"/><stop offset="1" stop-color="#5e4a29"/></linearGradient>'+
-   '<radialGradient id="bgShade" cx=".5" cy=".42" r=".6"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>'+
+    '<stop offset="0" stop-color="#B4C2D2"/><stop offset=".45" stop-color="#CBD6E2"/><stop offset="1" stop-color="#B4C2D2"/></linearGradient>'+
+   '<radialGradient id="bgShade" cx=".5" cy=".42" r=".6"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2E5A88" stop-opacity=".10"/></radialGradient>'+
   '</defs>'+
-  '<ellipse cx="100" cy="316" rx="46" ry="6" fill="#000" opacity=".35"/>'+
+  '<ellipse cx="100" cy="316" rx="44" ry="5" fill="#1E2126" opacity=".07"/>'+
   '<path id="bArmL" fill="url(#bgFill)"/><path id="bArmR" fill="url(#bgFill)"/>'+
   '<path id="bBody" fill="url(#bgFill)"/><path id="bBodyS" fill="url(#bgShade)"/>'+
   '<ellipse id="bHead" cx="100" cy="30" fill="url(#bgFill)"/>'+
-  '<g id="bAbs" stroke="#5e4a29" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0">'+
+  '<g id="bAbs" stroke="#8EA0B5" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0">'+
    '<path d="M100 104V152"/><path d="M90 113h7M103 113h7M90 127h7M103 127h7M91 141h6M103 141h6"/>'+
    '<path d="M78 98q22 9 44 0"/></g>'+
-  '<path id="bGhost" fill="none" stroke="#78b98c" stroke-width="1.6" stroke-dasharray="4 4" opacity=".9"/>'+
+  '<path id="bGhost" fill="none" stroke="#3E8A5C" stroke-width="1.6" stroke-dasharray="4 4" opacity=".9"/>'+
   '</svg>';
   BODY.built = true;
 }
@@ -2249,7 +2397,7 @@ function confetti(){
   const dpr = window.devicePixelRatio||1, W = innerWidth, H = innerHeight;
   c.width = W*dpr; c.height = H*dpr; document.body.appendChild(c);
   const g = c.getContext('2d'); g.scale(dpr,dpr);
-  const cols = ['#d4a95f','#78b98c','#6aa3cc','#f0ece4','#d96c56'];
+  const cols = ['#2E5A88','#3E8A5C','#A8782C','#C0502E','#9DB4CC'];
   const ps = Array.from({length:90}, () => ({
     x: W/2 + (Math.random()-.5)*60, y: H*0.38, vx:(Math.random()-.5)*11, vy:-Math.random()*12-4,
     r: Math.random()*Math.PI, vr:(Math.random()-.5)*.4, w:5+Math.random()*5, h:8+Math.random()*6, c: cols[(Math.random()*cols.length)|0]
@@ -2385,16 +2533,13 @@ function renderFoodGrid(){
     if(x[0]==='p'){ const it = setItems(x[2]); names = it.map(y=>y[0][0]+(y[1]!==1?' ×'+y[1]:'')); tot = setTotal(x[2]); }
     else { const s = DB.mySets[x[1]]; names = s.items.map(y=>y.n); tot = s.items.reduce((a,y)=>({k:a.k+y.k,p:a.p+(y.p||0),f:a.f+(y.f||0)}),{k:0,p:0,f:0}); }
     return '<button class="food set" onclick="addSet(\''+x[0]+'\','+x[1]+',event)">'+
-      '<span class="fn">'+(x[0]==='m'?'★ ':'')+esc(x[2][0])+'</span>'+
-      '<span class="fi">'+esc(names.join('・'))+'</span>'+
-      '<span class="fk">'+Math.round(tot.k*amt)+' kcal<i>P'+(tot.p*amt).toFixed(0)+' F'+(tot.f*amt).toFixed(0)+'</i></span></button>';
+      '<span class="fn">'+(x[0]==='m'?'★ ':'')+esc(x[2][0])+'<i>'+esc(names.join('・'))+'</i></span>'+
+      '<b class="fq">'+Math.round(tot.k*amt)+'<small>kcal</small></b><span class="plus">+</span></button>';
   }).join('');
   const foodHtml = list.map(f=>
     '<button class="food" onclick="addFood('+JSON.stringify(JSON.stringify(f)).replace(/"/g,'&quot;')+', event)">'+
-    '<span class="fn">'+esc(f[0])+'</span>'+
-    '<span class="fk">'+Math.round(f[1]*amt)+' kcal'+
-    '<i>P'+(f[2]*amt).toFixed(1)+' F'+(f[3]*amt).toFixed(1)+'</i>'+
-    edoBadge(f[4])+'</span></button>').join('');
+    '<span class="fn">'+esc(f[0])+edoBadge(f[4])+'<i>P'+(f[2]*amt).toFixed(1)+'　F'+(f[3]*amt).toFixed(1)+'</i></span>'+
+    '<b class="fq">'+Math.round(f[1]*amt)+'<small>kcal</small></b><span class="plus">+</span></button>').join('');
   const n = list.length + sets.length;
   document.getElementById('foodCnt').textContent = q ? ('「'+q+'」で '+n+' 件') : (cat==='セット' ? '1タップでまとめて記録します' : n+' 品');
   document.getElementById('foodGrid').innerHTML = n ? setHtml + foodHtml
@@ -2652,7 +2797,7 @@ function renderGraph(){
   document.getElementById('logBody').innerHTML = tb.length? tb.join('') : '<tr><td colspan="5" class="muted">記録なし</td></tr>';
 }
 /* canvasはCSS変数を直接使えないので、同じ値をここにも置く */
-const CLR = { accent:'#d4a95f', ai:'#6aa3cc', good:'#78b98c', bad:'#d96c56' };
+const CLR = { accent:'#A9ADB4', ai:'#2E5A88', good:'#3E8A5C', bad:'#C0502E' };
 function drawChart(){
   const cv = document.getElementById('chart'), s = DB.settings;
   const dpr = window.devicePixelRatio||1;
@@ -2679,9 +2824,9 @@ function drawChart(){
   g.font = '10px -apple-system,sans-serif'; g.textAlign='right'; g.textBaseline='middle';
   for(let i=0;i<=4;i++){
     const v = mn + (mx-mn)*i/4, y = Y(v);
-    g.strokeStyle = '#262b36'; g.lineWidth=1;
+    g.strokeStyle = '#EEEAE2'; g.lineWidth=1;
     g.beginPath(); g.moveTo(x0,y); g.lineTo(x1,y); g.stroke();
-    g.fillStyle = '#646d80'; g.fillText(v.toFixed(1), x0-5, y);
+    g.fillStyle = '#9A9DA3'; g.fillText(v.toFixed(1), x0-5, y);
   }
   // 目標ペース線
   g.strokeStyle=CLR.good; g.lineWidth=2; g.setLineDash([5,4]);
@@ -2689,11 +2834,11 @@ function drawChart(){
   g.setLineDash([]);
   // 今日の縦線
   const tx = X(isoToday());
-  g.strokeStyle='#3b4252'; g.lineWidth=1; g.beginPath(); g.moveTo(tx,y0); g.lineTo(tx,y1); g.stroke();
+  g.strokeStyle='#DCD6CB'; g.lineWidth=1; g.beginPath(); g.moveTo(tx,y0); g.lineTo(tx,y1); g.stroke();
 
   if(data.length){
     // 先に実測（点と細線）を描く
-    g.strokeStyle='rgba(212,169,95,.4)'; g.lineWidth=1.5; g.beginPath();
+    g.strokeStyle='rgba(154,157,163,.45)'; g.lineWidth=1.5; g.beginPath();
     data.forEach((k,i)=> i? g.lineTo(X(k),Y(DB.days[k].w)) : g.moveTo(X(k),Y(DB.days[k].w)));
     g.stroke();
     g.fillStyle=CLR.accent;
@@ -2712,7 +2857,7 @@ function drawChart(){
     }
   }
   // 軸ラベル
-  g.textAlign='left'; g.fillStyle='#5f6675'; g.textBaseline='top';
+  g.textAlign='left'; g.fillStyle='#9A9DA3'; g.textBaseline='top';
   g.fillText(first.slice(5).replace('-','/'), x0, y1+5);
   g.textAlign='right'; g.fillText(last.slice(5).replace('-','/'), x1, y1+5);
 }
